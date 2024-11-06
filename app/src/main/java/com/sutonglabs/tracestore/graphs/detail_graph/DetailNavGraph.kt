@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.sutonglabs.tracestore.common.Constrains
+import com.sutonglabs.tracestore.data.DemoCartItems
 import com.sutonglabs.tracestore.graphs.Graph
 import com.sutonglabs.tracestore.ui.cart_screen.CartScreen
 import com.sutonglabs.tracestore.ui.notification_screen.NotificationScreen
@@ -16,8 +17,9 @@ fun NavGraphBuilder.detailNavGraph(navController: NavHostController) {
         startDestination = DetailScreen.ProductDetailScreen.route + "/{${Constrains.PRODUCT_ID_PARAM}}"
     ) {
         composable(DetailScreen.CartScreen.route) {
-            CartScreen()
+            CartScreen(cartItems = DemoCartItems.items) // Pass the cart items here
         }
+
         composable(DetailScreen.NotificationScreen.route) {
             NotificationScreen()
         }
