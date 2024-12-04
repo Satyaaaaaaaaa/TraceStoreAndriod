@@ -1,17 +1,13 @@
 package com.sutonglabs.tracestore.repository
 
 import com.sutonglabs.tracestore.api.TraceStoreAPI
-import com.sutonglabs.tracestore.data.DemoDB
-import com.sutonglabs.tracestore.models.Product
 import com.sutonglabs.tracestore.models.ProductResponse
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
-import retrofit2.Call
 import retrofit2.await
 import javax.inject.Inject
 
 class ProductRepositoryImp @Inject constructor(
-//    private val demoDB: DemoDB
     private val traceStoreApiService: TraceStoreAPI
 ) : ProductRepository {
 
