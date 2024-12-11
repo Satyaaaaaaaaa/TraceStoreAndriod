@@ -1,6 +1,8 @@
 package com.sutonglabs.tracestore.api
 
 import com.sutonglabs.tracestore.models.AddToCartRequest
+import com.sutonglabs.tracestore.models.Address
+import com.sutonglabs.tracestore.models.AddressResponse
 import com.sutonglabs.tracestore.models.CartResponse
 import com.sutonglabs.tracestore.models.ProductResponse
 import com.sutonglabs.tracestore.models.ProductDetailResponse
@@ -43,6 +45,9 @@ interface TraceStoreAPI {
 
     @GET("cart")
     fun getCart(@Header("Authorization") token: String): Call<CartResponse>
+
+    @GET("address")
+    fun getAddress(@Header("Authorization") token: String): Call<AddressResponse>
 
     @POST("/cart/add")
     suspend fun addToCart(

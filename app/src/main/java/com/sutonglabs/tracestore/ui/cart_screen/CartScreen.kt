@@ -29,6 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navOptions
 import coil.compose.rememberImagePainter
 import com.sutonglabs.tracestore.common.Constants
 import com.sutonglabs.tracestore.models.CartProduct
@@ -73,6 +75,7 @@ fun CartScreen(
 
         // Checkout Bar (Fixed at the bottom)
         Checkout(
+            navController = navController,
             totalAmount = "₹${"%.2f".format(totalAmount)}", // Format totalAmount as a Double
             onCheckoutClick = { /* Handle checkout click */ },
             modifier = Modifier
@@ -131,7 +134,7 @@ fun ProductCard(product: CartProduct, quantity: Int,  onItemClick: (Int) -> Unit
 }
 
 @Composable
-fun Checkout(totalAmount: String, onCheckoutClick: () -> Unit, modifier: Modifier = Modifier) {
+fun Checkout(navController: NavController, totalAmount: String, onCheckoutClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -149,7 +152,9 @@ fun Checkout(totalAmount: String, onCheckoutClick: () -> Unit, modifier: Modifie
                 text = "Total: $totalAmount",
                 style = MaterialTheme.typography.titleMedium
             )
-            Button(onClick = onCheckoutClick) {
+            Button(onClick = {
+                navController.navigate("checkout_screen")
+            }) {
                 Text(text = "Checkout")
             }
         }

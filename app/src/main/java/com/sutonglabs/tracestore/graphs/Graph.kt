@@ -5,5 +5,5 @@ object Graph {
     const val AUTHENTICATION = "auth_graph"
     const val HOME = "home_graph"
     const val DETAILS = "details_graph"
-    const val PROFILE = "profile"
+    const val CART = "cart_graph"
 }
