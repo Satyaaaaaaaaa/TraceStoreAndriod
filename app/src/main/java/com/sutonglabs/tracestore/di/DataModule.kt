@@ -2,6 +2,8 @@ package com.sutonglabs.tracestore.di
 
 import com.sutonglabs.tracestore.api.TraceStoreAPI
 import com.sutonglabs.tracestore.data.DemoDB
+import com.sutonglabs.tracestore.repository.AddressRepository
+import com.sutonglabs.tracestore.repository.AddressRepositoryImp
 import com.sutonglabs.tracestore.repository.CartRepository
 import com.sutonglabs.tracestore.repository.CartRepositoryImp
 import com.sutonglabs.tracestore.repository.ProductRepository
@@ -27,5 +29,13 @@ object DataModule {
         traceStoreAPIService: TraceStoreAPI
     ): CartRepository {
         return CartRepositoryImp(traceStoreAPIService)
+    }
+
+    @Provides
+    fun provideAddressRepository(
+        // Add dependencies if necessary, e.g., DAOs, Retrofit services, etc.
+        traceStoreAPIService: TraceStoreAPI
+    ): AddressRepository {
+        return AddressRepositoryImp(traceStoreAPIService)
     }
 }
