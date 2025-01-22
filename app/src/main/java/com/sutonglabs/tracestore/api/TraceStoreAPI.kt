@@ -53,11 +53,11 @@ interface TraceStoreAPI {
         @Header("Authorization") token: String
     ): Response<CartResponse>
 
-    @POST("product/add")
+    @POST("product/")
     suspend fun addProduct(@Body product: Product): Response<Product>
 
     @Multipart
-    @POST("upload")
+    @POST("upload/image")
     suspend fun uploadImage(@Part image: MultipartBody.Part): Response<ImageUploadResponse>
 }
 
