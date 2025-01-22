@@ -6,9 +6,11 @@ import com.sutonglabs.tracestore.api.TraceStoreAPI
 import com.sutonglabs.tracestore.data.getJwtToken
 import com.sutonglabs.tracestore.models.Product
 import com.sutonglabs.tracestore.models.ProductResponse
+import com.sutonglabs.tracestore.models.ImageUploadResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import okhttp3.MultipartBody
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -62,4 +64,18 @@ class ProductRepositoryImp @Inject constructor(
         }
         return null
     }
+
+    // Upload Image method
+    override suspend fun uploadImage(image: MultipartBody.Part): ImageUploadResponse? {
+        try {
+            val response = traceStoreApiService.uploadImage(image)
+            if (response.isSuccessful) {
+                return response.body()
+            }
+        } catch (e: Exception) {
+            Log.e("ProductRepository", "Error uploading image: ${e.localizedMessage}")
+        }
+        return null
+    }
 }
+
