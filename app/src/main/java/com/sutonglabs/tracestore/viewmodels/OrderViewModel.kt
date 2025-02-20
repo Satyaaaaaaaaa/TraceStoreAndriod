@@ -22,8 +22,8 @@ class OrderViewModel @Inject constructor(
     private val orderRepository: OrderRepository
 ) : ViewModel() {
 
-    private val _orders = MutableStateFlow<List<Order>>(emptyList())
-    val orders: StateFlow<List<Order>> = _orders
+    private val _order = MutableStateFlow<List<Order>>(emptyList())
+    val order: StateFlow<List<Order>> = _order
 
     private val _state = mutableStateOf(CreateOrderState())
     val state: State<CreateOrderState> = _state
@@ -50,11 +50,11 @@ class OrderViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val response = orderRepository.getOrders(context)
-                _orders.value = response
-                Log.d("OrderViewModel", "Orders fetched successfully: ${response.size} orders")
+                _order.value = response
+                Log.d("OrderViewModel", "Orders fetched successfully: ${response.size} order")
             } catch (e: Exception) {
                 _errorMessage.value = e.message
-                Log.e("OrderViewModel", "Error fetching orders: ${e.message}")
+                Log.e("OrderViewModel", "Error fetching order: ${e.message}")
             }
         }
     }

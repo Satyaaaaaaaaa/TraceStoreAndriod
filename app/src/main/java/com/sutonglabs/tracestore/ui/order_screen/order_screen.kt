@@ -10,17 +10,17 @@ import com.sutonglabs.tracestore.viewmodels.OrderViewModel
 fun OrderScreen(
     orderViewModel: OrderViewModel = hiltViewModel()
 ) {
-    val orders by orderViewModel.orders.collectAsState()
+    val order by orderViewModel.order.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         orderViewModel.fetchOrders(context)
     }
 
-    if (orders.isEmpty()) {
-        Text("No orders available.")
+    if (order.isEmpty()) {
+        Text("No order available.")
     } else {
-        orders.forEach { order ->
+        order.forEach { order ->
             Text("Order ID: ${order.id}, Total Price: $${order.totalPrice}, Status: ${order.status}")
             order.items.forEach { item ->
                 Text("- ${item.productName}")

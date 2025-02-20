@@ -36,7 +36,7 @@ sealed class BottomNavItem(val title: String, val icon: ImageVector, val route: 
 
     object OrdersNav : BottomNavItem(
         title = "Orders",
-        icon = Icons.Filled.ShoppingCart, // Using a cart icon for orders
+        icon = Icons.Filled.ShoppingCart, // Using a cart icon for order
         route = ShopHomeScreen.OrderScreen.route
     )
 }

@@ -36,7 +36,7 @@ class OrderRepositoryImp @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 response.body()!!
             } else {
-                throw Exception("Failed to fetch orders. ${response.errorBody()?.string()}")
+                throw Exception("Failed to fetch order. ${response.errorBody()?.string()}")
             }
         }
     }
