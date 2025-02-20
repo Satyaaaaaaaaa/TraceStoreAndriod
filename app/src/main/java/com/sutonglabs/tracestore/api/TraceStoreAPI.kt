@@ -8,6 +8,7 @@ import com.sutonglabs.tracestore.api.request_models.CreateOrderRequest
 import com.sutonglabs.tracestore.api.request_models.UpdateAddressRequest
 import com.sutonglabs.tracestore.api.response_model.CreateAddressResponse
 import com.sutonglabs.tracestore.api.response_model.CreateOrderResponse
+import com.sutonglabs.tracestore.api.response_model.OrdersResponse
 import com.sutonglabs.tracestore.api.response_model.UpdateAddressResponse
 import com.sutonglabs.tracestore.data.getJwtToken
 import com.sutonglabs.tracestore.models.AddToCartRequest
@@ -95,8 +96,7 @@ interface TraceStoreAPI {
     @GET("order")
     suspend fun getOrders(
         @Header("Authorization") token: String
-    ): Response<List<Order>>
-
+    ): Response<OrdersResponse>
 
     @PUT("cart/update")
     suspend fun updateCartItem(

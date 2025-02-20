@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sutonglabs.tracestore.api.request_models.CreateOrderRequest
-import com.sutonglabs.tracestore.models.Order
+import com.sutonglabs.tracestore.api.response_model.Order
 import com.sutonglabs.tracestore.repository.OrderRepository
 import com.sutonglabs.tracestore.viewmodels.state.CreateOrderState
 import dagger.hilt.android.lifecycle.HiltViewModel

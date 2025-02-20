@@ -2,9 +2,10 @@ package com.sutonglabs.tracestore.repository
 
 import android.content.Context
 import com.sutonglabs.tracestore.api.TraceStoreAPI
-import com.sutonglabs.tracestore.models.Order
 import com.sutonglabs.tracestore.api.request_models.CreateOrderRequest
 import com.sutonglabs.tracestore.api.response_model.CreateOrderResponse
+import com.sutonglabs.tracestore.api.response_model.Order
+import com.sutonglabs.tracestore.api.response_model.OrderItem
 import com.sutonglabs.tracestore.data.getJwtToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -34,10 +35,12 @@ class OrderRepositoryImp @Inject constructor(
         return withContext(Dispatchers.IO) {
             val response = traceStoreApiService.getOrders("Bearer $token")
             if (response.isSuccessful && response.body() != null) {
-                response.body()!!
+                response.body()!!.data // Correctly returning the list of orders
             } else {
-                throw Exception("Failed to fetch order. ${response.errorBody()?.string()}")
+                throw Exception("Failed to fetch orders. ${response.errorBody()?.string()}")
             }
         }
     }
+
+
 }
