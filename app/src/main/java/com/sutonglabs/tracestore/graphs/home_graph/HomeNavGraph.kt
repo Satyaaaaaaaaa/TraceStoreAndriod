@@ -1,6 +1,5 @@
 package com.sutonglabs.tracestore.graphs.home_graph
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -16,17 +15,21 @@ import com.sutonglabs.tracestore.ui.favourite_screen.FavouriteScreen
 import com.sutonglabs.tracestore.ui.profile_screen.ProfileScreen
 import com.sutonglabs.tracestore.ui.order_screen.OrderScreen // Import your OrdersScreen
 import com.sutonglabs.tracestore.repository.ProductRepository
+import com.sutonglabs.tracestore.ui.seller_dashboard_screen.SellerDashboardScreen
+import com.sutonglabs.tracestore.ui.seller_dashboard_screen.SellerProductListScreen
+import com.sutonglabs.tracestore.ui.update_profile_screen.UpdateProfileScreen
+import com.sutonglabs.tracestore.viewmodels.UserViewModel
 
 @Composable
 fun HomeNavGraph(
     navHostController: NavHostController,
-    productRepository: ProductRepository
+    productRepository: ProductRepository,
+    userViewModel: UserViewModel   // add this param
 ) {
     NavHost(
         navController = navHostController,
         route = Graph.HOME,
-        startDestination = ShopHomeScreen.DashboardScreen.route
-    ) {
+        startDestination = ShopHomeScreen.DashboardScreen.route    ) {
         composable(ShopHomeScreen.DashboardScreen.route) {
             DashboardScreen() { productId ->
                 navHostController.navigate(DetailScreen.ProductDetailScreen.route + "/$productId")
@@ -39,9 +42,12 @@ fun HomeNavGraph(
             ConversationScreen()
         }
         composable(ShopHomeScreen.ProfileScreen.route) {
-            ProfileScreen {
+            ProfileScreen(navController = navHostController) {
                 navHostController.popBackStack()
             }
+        }
+        composable("seller_dashboard_screen") {
+            SellerDashboardScreen(navHostController)
         }
 
         composable(ShopHomeScreen.OrderScreen.route) {
@@ -51,6 +57,13 @@ fun HomeNavGraph(
 
         composable("add_product_screen") {
             AddProductScreen(navHostController = navHostController, productRepository = productRepository)
+        }
+
+        composable("update_profile_screen") {
+            UpdateProfileScreen(navController = navHostController)
+        }
+        composable("seller_product_list") {
+            SellerProductListScreen(navController = navHostController, userViewModel = userViewModel)
         }
 
         // detail and cart graphs

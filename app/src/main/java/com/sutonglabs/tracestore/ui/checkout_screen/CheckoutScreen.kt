@@ -1,5 +1,6 @@
 package com.sutonglabs.tracestore.ui.checkout_screen
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.livedata.observeAsState
 
 import android.content.Context
@@ -54,9 +55,7 @@ fun CheckoutScreen(
     LaunchedEffect(updatedFlag?.value) {
         updatedFlag?.value?.let { updated ->
             if (updated) {
-                // Refresh the address state or update UI accordingly
                 addressViewModel.getAddress()
-                // Optionally, clear the flag:
                 navController.currentBackStackEntry?.savedStateHandle?.remove<Boolean>("addressUpdated")
             }
         }
@@ -69,23 +68,15 @@ fun CheckoutScreen(
             }
         }
         addressState.address.isNullOrEmpty() -> {
-
             Column(
-                modifier = Modifier
-                    .padding(16.dp))
-            {
+                modifier = Modifier.padding(16.dp)
+            ) {
                 Spacer(modifier = Modifier.height(8.dp))
-
                 Text(text = "Address Not Found!")
-
                 Spacer(modifier = Modifier.height(8.dp))
-
                 Button(
                     onClick = {
-                        // Navigate to the EditAddressScreen passing the address ID.
-                        addressState.let {
-                            navController.navigate("add_address_screen")
-                        }
+                        navController.navigate("add_address_screen")
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -95,52 +86,45 @@ fun CheckoutScreen(
             }
         }
         else -> {
-            val createOrderRequest = generateCreateOrderRequest(cartViewModel = cartViewModel, addressID = 1)
+            val address = addressState.address[0]
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                val address = addressState.address[0]
-
-                Log.d("CheckoutScreen TEST", "Address: $address")
-
-                address.let {
-                    AddressCard(
-                        address = address,
-                        navController = navController,
-                        name = it.name,
-                        phoneNumber = it.phoneNumber ?: "N/A",
-                        pincode = it.pincode ?: "N/A",
-                        city = it.city ?: "N/A",
-                        stateName = it.state ?: "N/A",
-                        locality = it.locality ?: "N/A",
-                        buildingName = it.buildingName ?: "N/A",
-                        landmark = it.landmark ?: "N/A",
-                    )
-                }
+                AddressCard(
+                    address = address,
+                    navController = navController,
+                    name = address.name,
+                    phoneNumber = address.phoneNumber ?: "N/A",
+                    pincode = address.pincode ?: "N/A",
+                    city = address.city ?: "N/A",
+                    stateName = address.state ?: "N/A",
+                    locality = address.locality ?: "N/A",
+                    buildingName = address.buildingName ?: "N/A",
+                    landmark = address.landmark ?: "N/A",
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Button(
                     onClick = {
-                        if (createOrderRequest != null) {
-                            Log.d("CheckoutScreen", "Order Request: $createOrderRequest")
-                            orderViewModel.createOrder(context = context, orderRequest = createOrderRequest)
-                            navController.navigate("order_created_screen")
-                        }
-
+                        // Pass selected address ID to PaymentScreen via savedStateHandle
+                        navController.currentBackStackEntry?.savedStateHandle?.set("selectedAddressId", address.id)
+                        navController.navigate("payment_screen")
                     },
                     modifier = Modifier.fillMaxWidth()
-
                 ) {
-                    Text(text = "Place Order Now!")
+                    Text(text = "Proceed to Payment")
                 }
+
                 Spacer(modifier = Modifier.height(4.dp))
             }
         }
     }
 }
+
 
 @Composable
 fun AddressCard(
@@ -238,7 +222,8 @@ fun AddressCard(
 }
 
 
-fun generateCreateOrderRequest(cartViewModel: CartViewModel,addressID: Int): CreateOrderRequest? {
+@SuppressLint("SuspiciousIndentation")
+fun generateCreateOrderRequest(cartViewModel: CartViewModel, addressID: Int): CreateOrderRequest? {
     val products = cartViewModel.state.value.product?.map {
         Product(
             productID = it.productId.toString(),

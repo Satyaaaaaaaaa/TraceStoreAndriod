@@ -2,6 +2,7 @@ package com.sutonglabs.tracestore.graphs.checkout_graph
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -11,6 +12,7 @@ import com.sutonglabs.tracestore.ui.add_address.AddAddressScreen
 import com.sutonglabs.tracestore.ui.checkout_screen.CheckoutScreen
 import com.sutonglabs.tracestore.ui.checkout_screen.OrderCreatedScreen
 import com.sutonglabs.tracestore.ui.edit_address.EditAddressScreen
+import com.sutonglabs.tracestore.ui.payment_screen.PaymentScreen
 
 @Composable
 fun CheckoutScreenWithContext(navController: NavHostController) {
@@ -49,6 +51,14 @@ fun NavGraphBuilder.checkoutNavGraph(navController: NavHostController) {
         composable(CheckoutScreen.OrderCreatedScreen.route) {
             OrderCreatedScreen(navController = navController)
         }
+        composable("payment_screen") {
+            val context = LocalContext.current
+            PaymentScreen(
+                navController = navController,
+                context = context,
+                cartViewModel = hiltViewModel(),
+                orderViewModel = hiltViewModel()
+            )
+        }
     }
-
 }

@@ -66,16 +66,17 @@ fun NavigationBar(
             NavigationBarItem(
                 selected = false,
                 icon = {
-                    IconButton(onClick = { navController.navigate("add_product_screen") }) {
+                    IconButton(onClick = { navController.navigate("seller_dashboard_screen") }) {
                         Icon(
-                            imageVector = Icons.Filled.Add, // <-- Use the Add icon
-                            contentDescription = "Add Product",
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Seller Dashboard",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
                 onClick = {},
             )
+
         }
     }
 

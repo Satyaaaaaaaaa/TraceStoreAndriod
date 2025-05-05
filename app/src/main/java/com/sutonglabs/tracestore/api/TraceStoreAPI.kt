@@ -6,6 +6,7 @@ import android.util.Log
 import com.sutonglabs.tracestore.api.request_models.CreateAddressRequest
 import com.sutonglabs.tracestore.api.request_models.CreateOrderRequest
 import com.sutonglabs.tracestore.api.request_models.UpdateAddressRequest
+import com.sutonglabs.tracestore.api.request_models.UpdateUserRequest
 import com.sutonglabs.tracestore.api.response_model.CreateAddressResponse
 import com.sutonglabs.tracestore.api.response_model.CreateOrderResponse
 import com.sutonglabs.tracestore.api.response_model.OrdersResponse
@@ -57,11 +58,11 @@ interface TraceStoreAPI {
     @GET("user")
     suspend fun getUserInfo(@Header("Authorization") token: String): Response<UserResponse>
 
-    @POST("user/update")
-    suspend fun updateUser(@Body user: User, @Header("Authorization") token: String): Response<User>
-
-    @DELETE("user/{id}")
-    suspend fun deleteUser(@Path("id") id: Int, @Header("Authorization") token: String): Response<Unit>
+    @PATCH("user")
+    suspend fun updateUser(
+        @Body request: UpdateUserRequest,
+        @Header("Authorization") token: String
+    ): Response<UserResponse>
 
     @GET("cart")
     fun getCart(@Header("Authorization") token: String): Call<CartResponse>
@@ -113,5 +114,11 @@ interface TraceStoreAPI {
     @Multipart
     @POST("upload/image")
     suspend fun uploadImage(@Part image: MultipartBody.Part): Response<ImageUploadResponse>
+
+    @GET("/product/user/products")
+    suspend fun getUserProducts(
+        @Header("Authorization") token: String
+    ): ProductResponse
+
 }
 

@@ -1,6 +1,6 @@
 package com.sutonglabs.tracestore.ui.profile_screen
 
-import androidx.compose.foundation.background
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -11,17 +11,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.compose.ui.platform.LocalContext
+import com.sutonglabs.tracestore.graphs.Graph
 import com.sutonglabs.tracestore.viewmodels.UserViewModel
 
 @Composable
 fun ProfileScreen(
+    navController: NavController,
     userViewModel: UserViewModel = hiltViewModel(),
     onBackBtnClick: () -> Unit
 ) {
+    // Access the context
+    val context = LocalContext.current
+
     val userInfo by userViewModel.userInfo.collectAsState()
 
     // Get JWT token and fetch user info
@@ -77,7 +83,46 @@ fun ProfileScreen(
         ) {
             Text(text = "Back", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
+        Button(
+            onClick = {
+                // Navigate to the update screen
+                navController.navigate("update_profile_screen")
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+        ) {
+            Text(text = "Update Profile", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        }
+
     }
+    Button(
+        onClick = {
+            userViewModel.logout(context)
+
+            navController.navigate(Graph.AUTHENTICATION) {
+                // Pop everything above the 'auth_graph' route
+                popUpTo(Graph.ROOT) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+    ) {
+        Text(
+            text = "Logout",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+    }
+
+
 }
 
 // Helper function for displaying profile details in a row format
@@ -90,10 +135,4 @@ fun ProfileDetailRow(label: String, value: String) {
         Text(text = label, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
         Text(text = value, fontSize = 16.sp)
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-    ProfileScreen(onBackBtnClick = {})
 }
