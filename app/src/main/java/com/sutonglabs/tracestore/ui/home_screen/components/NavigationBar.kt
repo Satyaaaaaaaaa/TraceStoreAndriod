@@ -33,7 +33,8 @@ fun NavigationBar(
     val navItemList = listOf(
         BottomNavItem.ProfileNav,
         BottomNavItem.HomeNav,
-        BottomNavItem.OrdersNav // Add Orders to bottom navigation
+        BottomNavItem.OrdersNav,
+        BottomNavItem.SellerDashboard
     )
 
 
@@ -63,19 +64,21 @@ fun NavigationBar(
             }
 
             // Add the "+" icon for navigating to AddProductScreen
-            NavigationBarItem(
-                selected = false,
-                icon = {
-                    IconButton(onClick = { navController.navigate("seller_dashboard_screen") }) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "Seller Dashboard",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                onClick = {},
-            )
+            // TODO: fix it inside the loop
+            //******Fixed!!*****
+//            NavigationBarItem(
+//                selected = false,
+//                icon = {
+//                    IconButton(onClick = { navController.navigate("seller_dashboard_screen") }) {
+//                        Icon(
+//                            imageVector = Icons.Filled.Add,
+//                            contentDescription = "Seller Dashboard",
+//                            tint = MaterialTheme.colorScheme.primary
+//                        )
+//                    }
+//                },
+//                onClick = {},
+//            )
 
         }
     }

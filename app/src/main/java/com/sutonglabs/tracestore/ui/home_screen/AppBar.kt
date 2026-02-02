@@ -31,6 +31,9 @@ import androidx.navigation.NavController
 import com.sutonglabs.tracestore.ui.home_screen.components.SearchBar
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.google.android.material.search.SearchView
+import com.sutonglabs.tracestore.graphs.search_graph.SearchRoute
+import com.sutonglabs.tracestore.models.Category
+import com.sutonglabs.tracestore.ui.home_screen.components.CategoryStrip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,8 +41,9 @@ fun AppBar(
     navController: NavController,
     isVisible: Boolean,
     onNotificationIconClick: () -> Unit,
-    onCartIconClick: () -> Unit
-) {
+    onCartIconClick: () -> Unit,
+    categories: List<Category>,
+    ) {
 
     var query by rememberSaveable { mutableStateOf("") }
 
@@ -56,8 +60,6 @@ fun AppBar(
             ) {
                 Box(
                     modifier = Modifier
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
                         .clickable {
                             onCartIconClick()
                         },
@@ -70,8 +72,6 @@ fun AppBar(
 
                     Box(
                         modifier = Modifier
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
                             .constrainAs(notification) {}
                             .clickable {
                                 onNotificationIconClick()
@@ -85,6 +85,7 @@ fun AppBar(
                         )
                     }
                     //notification count
+                    // TODO: fix notification server/android
                     Box(
                         modifier = Modifier
                             .background(color = Color.Red, shape = CircleShape)
@@ -114,7 +115,7 @@ fun AppBar(
                         onValueChange = { query = it },
                         onSearchSubmit = {
                             if (query.isNotBlank()) {
-                                navController.navigate("search?query=$query")
+                                navController.navigate(SearchRoute.Search.createRoute(query))
                             }
                             query = ""
                         }
@@ -123,6 +124,19 @@ fun AppBar(
                 }
 
             }
+
+            CategoryStrip(
+                categories = categories,
+                onCategoryClick = { category ->
+                    //TEST: use this for sql based categorisation
+                    //navController.navigate("category-products/${category.id}")
+
+                    //After doing research - sql bases categorization almost equal but searching is slower in sql
+                    //resarch on postman
+                    //TEST: use this for meilisearch based categorization
+                    navController.navigate(SearchRoute.Search.createRoute(category.name))
+                }
+            )
         }
     }
 }
