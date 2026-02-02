@@ -7,22 +7,23 @@ import androidx.navigation.navArgument
 import androidx.navigation.NavType
 import com.sutonglabs.tracestore.ui.search_screen.SearchScreen
 
-const val SEARCH_ROUTE = "search"
-private const val QUERY_ARG = "query"
+//TODO: Hard code, create a new route builder file - clean arcitechture
+//const val SEARCH_ROUTE = "search"
+//private const val QUERY_ARG = "query"
 
 fun NavGraphBuilder.searchNavGraph(
     navController: NavHostController
 ) {
     composable(
-        route = "$SEARCH_ROUTE?$QUERY_ARG={$QUERY_ARG}",
+        route = SearchRoute.Search.route,
         arguments = listOf(
-            navArgument(QUERY_ARG) {
+            navArgument(SearchRoute.Search.QUERY_ARG) {
                 type = NavType.StringType
                 defaultValue = ""
             }
         )
     ) { backStackEntry ->
-        val query = backStackEntry.arguments?.getString(QUERY_ARG).orEmpty()
+        val query = backStackEntry.arguments?.getString(SearchRoute.Search.QUERY_ARG).orEmpty()
 
         SearchScreen(
             initialQuery = query,

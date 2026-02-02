@@ -1,6 +1,7 @@
 package com.sutonglabs.tracestore.ui.home_screen.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -39,5 +40,11 @@ sealed class BottomNavItem(val title: String, val icon: ImageVector, val route: 
         title = "Orders",
         icon = Icons.Filled.Inventory, // Using a cart icon for order
         route = ShopHomeScreen.OrderScreen.route
+    )
+
+    object SellerDashboard : BottomNavItem(
+        title = "seller dashboard",
+        icon = Icons.Filled.AddCircleOutline,
+        route = ShopHomeScreen.SellerDashboardScreen.route
     )
 }
