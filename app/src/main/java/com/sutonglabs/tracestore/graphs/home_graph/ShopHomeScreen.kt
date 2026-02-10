@@ -8,4 +8,6 @@ sealed class ShopHomeScreen(val route: String) {
     object OrderScreen :ShopHomeScreen("order_screen")
 
     object SellerDashboardScreen : ShopHomeScreen("seller_dashboard_screen")
+
+    object QrScannerScreen : ShopHomeScreen("qr_scanner")
 }
