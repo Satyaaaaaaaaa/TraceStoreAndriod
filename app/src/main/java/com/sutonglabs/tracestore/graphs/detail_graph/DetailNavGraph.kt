@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import com.sutonglabs.tracestore.ui.asset_details_screen.AssetDetailsScreen
 
 @Composable
 fun CartScreenWithContext(onItemClick: (Int, String, Context) -> Unit) {
@@ -59,6 +60,19 @@ fun NavGraphBuilder.detailNavGraph(navController: NavHostController) {
                 popBack = { navController.popBackStack() },
                 context = context,
                 token = token
+            )
+        }
+
+        composable(
+            route = DetailScreen.AssetDetailScreen.route + "/{assetId}"
+        ) { backStackEntry ->
+
+            val assetId =
+                backStackEntry.arguments?.getString("assetId")!!
+
+            AssetDetailsScreen(
+                assetId = assetId,
+                popBack = { navController.popBackStack() }
             )
         }
     }

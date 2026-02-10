@@ -34,6 +34,7 @@ import com.google.android.material.search.SearchView
 import com.sutonglabs.tracestore.graphs.search_graph.SearchRoute
 import com.sutonglabs.tracestore.models.Category
 import com.sutonglabs.tracestore.ui.home_screen.components.CategoryStrip
+import com.sutonglabs.tracestore.ui.home_screen.components.QrScannerButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,6 +124,9 @@ fun AppBar(
 
                 }
 
+                QrScannerButton(
+                    navController = navController
+                )
             }
 
             CategoryStrip(

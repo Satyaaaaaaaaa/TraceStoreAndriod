@@ -22,6 +22,7 @@ import com.sutonglabs.tracestore.ui.update_profile_screen.UpdateProfileScreen
 import com.sutonglabs.tracestore.viewmodels.UserViewModel
 import com.sutonglabs.tracestore.graphs.search_graph.searchNavGraph
 import com.sutonglabs.tracestore.graphs.category_products_graph.categoryProductsNavGraph
+import com.sutonglabs.tracestore.ui.qr_scanner_screen.QrScannerScreen
 
 @Composable
 fun HomeNavGraph(
@@ -81,6 +82,12 @@ fun HomeNavGraph(
             SellerOrdersScreen(onProductClick = { productId ->
                 navHostController.navigate(DetailScreen.ProductDetailScreen.route + "/$productId")
             })
+        }
+
+        composable(ShopHomeScreen.QrScannerScreen.route) {
+            QrScannerScreen(
+                navController = navHostController
+            )
         }
 
 

@@ -2,7 +2,6 @@ package com.sutonglabs.tracestore.api
 
 import com.sutonglabs.tracestore.models.*
 import okhttp3.MultipartBody
-import android.util.Log
 import com.sutonglabs.tracestore.api.request_models.CreateAddressRequest
 import com.sutonglabs.tracestore.api.request_models.CreateOrderRequest
 import com.sutonglabs.tracestore.api.request_models.UpdateAddressRequest
@@ -11,18 +10,16 @@ import com.sutonglabs.tracestore.api.response_model.CreateAddressResponse
 import com.sutonglabs.tracestore.api.response_model.CreateOrderResponse
 import com.sutonglabs.tracestore.api.response_model.OrdersResponse
 import com.sutonglabs.tracestore.api.response_model.UpdateAddressResponse
-import com.sutonglabs.tracestore.data.getJwtToken
 import com.sutonglabs.tracestore.models.AddToCartRequest
 import com.sutonglabs.tracestore.models.AddressResponse
 import com.sutonglabs.tracestore.models.CartResponse
 import com.sutonglabs.tracestore.models.ProductResponse
 import com.sutonglabs.tracestore.models.ProductDetailResponse
-import kotlinx.coroutines.flow.first
 import com.sutonglabs.tracestore.api.response_model.SearchResponse
+import com.sutonglabs.tracestore.models.assets.AssetVerificationResult
 import retrofit2.Response
 import retrofit2.Call
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
@@ -158,5 +155,10 @@ interface TraceStoreAPI {
     suspend fun getProductsByCategory(
         @Query("cat") categoryId: Int
     ): Response<ProductResponse>
+
+    @POST("asset/verify")
+    suspend fun verifyAsset(
+        @Body body: Map<String, String>
+    ): AssetVerificationResult
 }
 
