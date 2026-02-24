@@ -16,8 +16,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.sutonglabs.tracestore.models.Category
+import com.sutonglabs.tracestore.models.CategoryTree
 import com.sutonglabs.tracestore.models.ProductCreate
+import com.sutonglabs.tracestore.models.SubCategory
 import com.sutonglabs.tracestore.repository.ProductRepository
 import com.sutonglabs.tracestore.ui.image_preview_grid.ImagePreviewGrid
 import com.sutonglabs.tracestore.viewmodels.AddProductViewModel
@@ -29,7 +30,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddProductScreen(
     navHostController: NavHostController,
@@ -39,21 +40,25 @@ fun AddProductScreen(
     )
 ) {
 
-    var productName by remember { mutableStateOf(TextFieldValue("Realme 6")) }
-    var productDescription by remember { mutableStateOf(TextFieldValue("Mobile Phone")) }
-    var productPrice by remember { mutableStateOf(TextFieldValue("16999")) }
+    var productName by remember { mutableStateOf(TextFieldValue("")) }
+    var productDescription by remember { mutableStateOf(TextFieldValue("")) }
+    var productPrice by remember { mutableStateOf(TextFieldValue("")) }
 
     var selectedImageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    var selectedCategories by remember { mutableStateOf<List<Category>>(emptyList()) }
-    var expanded by remember { mutableStateOf(false) }
+
+    //NEW CATEGORY STATE
+    var selectedParent by remember { mutableStateOf<CategoryTree?>(null) }
+    var selectedSubCategory by remember { mutableStateOf<SubCategory?>(null) }
+
+    var parentExpanded by remember { mutableStateOf(false) }
+    var subExpanded by remember { mutableStateOf(false) }
 
     val categoryViewModel: CategoryViewModel = viewModel()
-    val categories = categoryViewModel.categories
+    val parentCategories = categoryViewModel.categories
 
     val state = addProductViewModel.state.value
     val context = LocalContext.current
 
-    // Image picker
     val pickImagesLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetMultipleContents()
@@ -61,22 +66,15 @@ fun AddProductScreen(
             selectedImageUris = uris.take(6)
         }
 
-    //  State handling
     LaunchedEffect(state) {
         when (state) {
             is AddProductState.Success -> {
-                Toast.makeText(
-                    context,
-                    "Product added successfully!",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(context, "Product added successfully!", Toast.LENGTH_SHORT).show()
                 navHostController.popBackStack()
             }
-
             is AddProductState.Error -> {
                 Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
             }
-
             else -> Unit
         }
     }
@@ -110,75 +108,79 @@ fun AddProductScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        //  Categories dropdown (multi-select)
+        // ======================
+        // PARENT CATEGORY DROPDOWN
+        // ======================
         ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
+            expanded = parentExpanded,
+            onExpandedChange = { parentExpanded = !parentExpanded }
         ) {
             OutlinedTextField(
-                value =
-                    if (selectedCategories.isEmpty())
-                        "Select Categories"
-                    else
-                        selectedCategories.joinToString { it.name },
+                value = selectedParent?.name ?: "Select Parent Category",
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Categories") },
+                label = { Text("Parent Category") },
                 modifier = Modifier
                     .menuAnchor()
                     .fillMaxWidth()
             )
 
             ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+                expanded = parentExpanded,
+                onDismissRequest = { parentExpanded = false }
             ) {
-                categories.forEach { category ->
-                    val isSelected =
-                        selectedCategories.any { it.id == category.id }
-
+                parentCategories.forEach { parent ->
                     DropdownMenuItem(
-                        text = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Checkbox(
-                                    checked = isSelected,
-                                    onCheckedChange = null
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text(category.name)
-                            }
-                        },
+                        text = { Text(parent.name) },
                         onClick = {
-                            selectedCategories =
-                                if (isSelected)
-                                    selectedCategories.filterNot { it.id == category.id }
-                                else
-                                    selectedCategories + category
+                            selectedParent = parent
+                            selectedSubCategory = null
+                            parentExpanded = false
                         }
                     )
                 }
             }
         }
 
-        // Selected category chips
-        if (selectedCategories.isNotEmpty()) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+        // ======================
+        // SUBCATEGORY DROPDOWN
+        // ======================
+        if (selectedParent != null) {
+
+            ExposedDropdownMenuBox(
+                expanded = subExpanded,
+                onExpandedChange = { subExpanded = !subExpanded }
             ) {
-                selectedCategories.forEach { category ->
-                    AssistChip(
-                        onClick = {
-                            selectedCategories =
-                                selectedCategories.filterNot { it.id == category.id }
-                        },
-                        label = { Text(category.name) }
-                    )
+                OutlinedTextField(
+                    value = selectedSubCategory?.name ?: "Select Subcategory",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Subcategory") },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = subExpanded,
+                    onDismissRequest = { subExpanded = false }
+                ) {
+                    selectedParent?.subcategories?.forEach { sub ->
+                        DropdownMenuItem(
+                            text = { Text(sub.name) },
+                            onClick = {
+                                selectedSubCategory = sub
+                                subExpanded = false
+                            }
+                        )
+                    }
                 }
             }
         }
 
-        // Image picker button
+        // ======================
+        // IMAGE PICKER
+        // ======================
         Button(
             onClick = { pickImagesLauncher.launch("image/*") },
             modifier = Modifier.fillMaxWidth()
@@ -198,17 +200,21 @@ fun AddProductScreen(
             )
         }
 
-
-        // Submit
+        // ======================
+        // SUBMIT
+        // ======================
         Button(
             modifier = Modifier.fillMaxWidth(),
             enabled = state !is AddProductState.Loading,
             onClick = {
 
-                if (selectedImageUris.isEmpty() || selectedCategories.isEmpty()) {
+                if (selectedImageUris.isEmpty()
+                    || selectedParent == null
+                    || selectedSubCategory == null
+                ) {
                     Toast.makeText(
                         context,
-                        "Select images and categories",
+                        "Select category and images",
                         Toast.LENGTH_SHORT
                     ).show()
                     return@Button
@@ -218,7 +224,7 @@ fun AddProductScreen(
                     name = productName.text,
                     description = productDescription.text,
                     price = productPrice.text.toIntOrNull() ?: 0,
-                    categoryIds = selectedCategories.map { it.id },
+                    categoryIds = listOf(selectedSubCategory!!.id), //only subcategory
                     image_uuids = emptyList()
                 )
 
@@ -227,7 +233,6 @@ fun AddProductScreen(
                     product = product,
                     imageUris = selectedImageUris
                 )
-
             }
         ) {
             if (state is AddProductState.Loading) {

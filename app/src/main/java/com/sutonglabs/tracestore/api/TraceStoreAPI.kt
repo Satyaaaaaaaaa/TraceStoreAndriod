@@ -7,6 +7,7 @@ import com.sutonglabs.tracestore.api.request_models.CreateAddressRequest
 import com.sutonglabs.tracestore.api.request_models.CreateOrderRequest
 import com.sutonglabs.tracestore.api.request_models.UpdateAddressRequest
 import com.sutonglabs.tracestore.api.request_models.UpdateUserRequest
+import com.sutonglabs.tracestore.api.response_model.CategoryTreeResponse
 import com.sutonglabs.tracestore.api.response_model.CreateAddressResponse
 import com.sutonglabs.tracestore.api.response_model.CreateOrderResponse
 import com.sutonglabs.tracestore.api.response_model.OrdersResponse
@@ -151,8 +152,8 @@ interface TraceStoreAPI {
         @Path("productId") productId: Int
     ): Response<ProductDetailResponse>
 
-    @GET("category/fetch-categories")
-    suspend fun getCategories(): List<Category>
+    @GET("category/tree")
+    suspend fun getCategories(): Response<CategoryTreeResponse>
 
     @GET("search")
     suspend fun searchProducts(
