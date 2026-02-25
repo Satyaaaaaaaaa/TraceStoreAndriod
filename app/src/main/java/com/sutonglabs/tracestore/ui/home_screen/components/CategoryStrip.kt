@@ -6,13 +6,13 @@ import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.sutonglabs.tracestore.models.Category
+import com.sutonglabs.tracestore.models.CategoryTree
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CategoryStrip(
-    categories: List<Category>,
-    onCategoryClick: (Category) -> Unit
+    categories: List<CategoryTree>,
+    onCategoryClick: (CategoryTree) -> Unit
 ) {
     if (categories.isEmpty()) return
 

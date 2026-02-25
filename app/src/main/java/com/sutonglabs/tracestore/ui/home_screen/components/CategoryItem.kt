@@ -8,11 +8,11 @@ import androidx.compose.ui.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.sutonglabs.tracestore.common.category.CategoryIconMapper
-import com.sutonglabs.tracestore.models.Category
+import com.sutonglabs.tracestore.models.CategoryTree
 
 @Composable
 fun CategoryItem(
-    category: Category,
+    category: CategoryTree,
     onClick: () -> Unit
 ) {
     val iconRes = remember(category.name) {

@@ -21,8 +21,8 @@ import com.sutonglabs.tracestore.ui.seller_dashboard_screen.SellerProductListScr
 import com.sutonglabs.tracestore.ui.update_profile_screen.UpdateProfileScreen
 import com.sutonglabs.tracestore.viewmodels.UserViewModel
 import com.sutonglabs.tracestore.graphs.search_graph.searchNavGraph
-import com.sutonglabs.tracestore.graphs.category_products_graph.categoryProductsNavGraph
 import com.sutonglabs.tracestore.ui.qr_scanner_screen.QrScannerScreen
+import com.sutonglabs.tracestore.graphs.subcategory_graph.subcategoryNavGraph
 
 @Composable
 fun HomeNavGraph(
@@ -97,7 +97,7 @@ fun HomeNavGraph(
 
         searchNavGraph(navController = navHostController)
 
-        categoryProductsNavGraph(navController = navHostController)
+        subcategoryNavGraph(navController = navHostController)
 
 
     }

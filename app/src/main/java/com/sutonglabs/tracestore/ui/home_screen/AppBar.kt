@@ -32,7 +32,8 @@ import com.sutonglabs.tracestore.ui.home_screen.components.SearchBar
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.google.android.material.search.SearchView
 import com.sutonglabs.tracestore.graphs.search_graph.SearchRoute
-import com.sutonglabs.tracestore.models.Category
+import com.sutonglabs.tracestore.graphs.subcategory_graph.SubcategoryRoute
+import com.sutonglabs.tracestore.models.CategoryTree
 import com.sutonglabs.tracestore.ui.home_screen.components.CategoryStrip
 import com.sutonglabs.tracestore.ui.home_screen.components.QrScannerButton
 
@@ -43,7 +44,7 @@ fun AppBar(
     isVisible: Boolean,
     onNotificationIconClick: () -> Unit,
     onCartIconClick: () -> Unit,
-    categories: List<Category>,
+    categories: List<CategoryTree>,
     ) {
 
     var query by rememberSaveable { mutableStateOf("") }
@@ -129,16 +130,23 @@ fun AppBar(
                 )
             }
 
+//            CategoryStrip(
+//                categories = categories,
+//                onCategoryClick = { category ->
+//                    //TEST: use this for sql based categorisation
+//                    //navController.navigate("category-products/${category.id}")
+//
+//                    //After doing research - sql bases categorization almost equal but searching is slower in sql
+//                    //resarch on postman
+//                    //TEST: use this for meilisearch based categorization
+//                    navController.navigate(SearchRoute.Search.createRoute(category.name))
+//                }
+//            )
+
             CategoryStrip(
                 categories = categories,
                 onCategoryClick = { category ->
-                    //TEST: use this for sql based categorisation
-                    //navController.navigate("category-products/${category.id}")
-
-                    //After doing research - sql bases categorization almost equal but searching is slower in sql
-                    //resarch on postman
-                    //TEST: use this for meilisearch based categorization
-                    navController.navigate(SearchRoute.Search.createRoute(category.name))
+                    navController.navigate(SubcategoryRoute.Subcategory.createRoute(category.id))
                 }
             )
         }
