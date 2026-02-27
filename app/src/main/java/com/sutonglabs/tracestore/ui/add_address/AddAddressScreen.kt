@@ -37,14 +37,14 @@ fun AddAddressScreen(
 //        }
         else -> {
 
-            var name by remember { mutableStateOf("") }
-            var phoneNumber by remember { mutableStateOf("") }
-            var pincode by remember { mutableStateOf("") }
-            var city by remember { mutableStateOf("") }
-            var stateName by remember { mutableStateOf("") }
-            var locality by remember { mutableStateOf("") }
-            var buildingName by remember { mutableStateOf("") }
-            var landmark by remember { mutableStateOf("") }
+            var name by remember { mutableStateOf("Satya") }
+            var phoneNumber by remember { mutableStateOf("9876543210") }
+            var pincode by remember { mutableStateOf("781022") }
+            var city by remember { mutableStateOf("Guwahati") }
+            var stateName by remember { mutableStateOf("Assam") }
+            var locality by remember { mutableStateOf("loda tola") }
+            var buildingName by remember { mutableStateOf("Residency") }
+            var landmark by remember { mutableStateOf("bhawan") }
 
             Column(
                 modifier = Modifier

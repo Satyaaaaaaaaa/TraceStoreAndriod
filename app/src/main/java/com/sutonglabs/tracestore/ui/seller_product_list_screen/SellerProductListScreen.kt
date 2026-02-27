@@ -108,7 +108,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
         shape = MaterialTheme.shapes.medium
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            ProductCardImage(product = product, height = 150.dp)
+            ProductCardImage(imageUrl = product.images.firstOrNull()?.imageUrl, product.name, height = 150.dp)
             Text(text = product.name, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = product.description, style = MaterialTheme.typography.bodyMedium)

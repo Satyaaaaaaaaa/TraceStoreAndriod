@@ -113,7 +113,7 @@ fun ProductCard(product: Product, onItemClick: (Int) -> Unit) {
     ) {
         Column {
             //Image section
-            ProductCardImage(product = product, height = 100.dp)
+            ProductCardImage(imageUrl = product.images.firstOrNull()?.imageUrl, product.name, height = 100.dp)
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -143,7 +143,7 @@ fun MoreProductCard(product: Product, onItemClick: (Int) -> Unit) {
     ) {
         Column {
 
-            ProductCardImage(product = product, height = 100.dp)
+            ProductCardImage(product.images.firstOrNull()?.imageUrl, name = product.name, height = 100.dp)
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(

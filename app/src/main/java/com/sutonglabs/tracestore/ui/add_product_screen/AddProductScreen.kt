@@ -40,9 +40,9 @@ fun AddProductScreen(
     )
 ) {
 
-    var productName by remember { mutableStateOf(TextFieldValue("")) }
-    var productDescription by remember { mutableStateOf(TextFieldValue("")) }
-    var productPrice by remember { mutableStateOf(TextFieldValue("")) }
+    var productName by remember { mutableStateOf(TextFieldValue("Realme 6")) }
+    var productDescription by remember { mutableStateOf(TextFieldValue("Mobile Phone")) }
+    var productPrice by remember { mutableStateOf(TextFieldValue("16999")) }
 
     var selectedImageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
 

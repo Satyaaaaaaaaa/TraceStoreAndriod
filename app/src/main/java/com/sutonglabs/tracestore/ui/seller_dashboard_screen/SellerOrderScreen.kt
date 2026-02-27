@@ -179,7 +179,8 @@ fun ProductItemView(
 
         //Reusable
         ProductCardImage(
-            product = item.product,
+            imageUrl = item.product.images.firstOrNull()?.imageUrl,
+            name = item.product.name,
             height = 60.dp,
         )
 
