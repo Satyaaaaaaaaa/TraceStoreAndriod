@@ -2,48 +2,84 @@ package com.sutonglabs.tracestore.viewmodels
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sutonglabs.tracestore.repository.ProductRepository
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.State
-import com.sutonglabs.tracestore.models.ImageUploadResponse
 import com.sutonglabs.tracestore.models.ProductCreate
-import kotlinx.coroutines.runBlocking
-import okhttp3.MultipartBody
+import com.sutonglabs.tracestore.repository.ProductRepository
 import com.sutonglabs.tracestore.viewmodels.state.AddProductState
+import kotlinx.coroutines.launch
 
 class AddProductViewModel(
     private val productRepository: ProductRepository
 ) : ViewModel() {
 
-    private val _state = mutableStateOf<AddProductState>(AddProductState.Idle)
+    // -----------------------------
+    // PRODUCT CREATION STATE
+    // -----------------------------
+    private val _state =
+        mutableStateOf<AddProductState>(AddProductState.Idle)
+
     val state: State<AddProductState> = _state
 
-    fun createProduct(
+
+    // ====================================================
+    // ✅ IMAGE UPLOAD (STEP 1)
+    // ====================================================
+    fun uploadImages(
         context: Context,
-        product: ProductCreate,
-        imageUris: List<Uri>
+        imageUris: List<Uri>,
+        onSuccess: (List<String>) -> Unit,
+        onError: (String) -> Unit
     ) {
+
         viewModelScope.launch {
-            _state.value = AddProductState.Loading
+
             try {
-                val uploadResponse =
-                    productRepository.uploadImages(context, imageUris)
 
-                val finalProduct =
-                    product.copy(image_uuids = uploadResponse.image_uuids)
+                val response =
+                    productRepository.uploadImages(
+                        context,
+                        imageUris
+                    )
 
-                productRepository.addProduct(finalProduct)
-                _state.value = AddProductState.Success
+                onSuccess(response.image_uuids)
 
             } catch (e: Exception) {
-                _state.value =
-                    AddProductState.Error(e.message ?: "Something went wrong")
+
+                onError(
+                    e.message ?: "Image upload failed"
+                )
             }
         }
     }
 
+
+    // ====================================================
+    // ✅ CREATE PRODUCT (STEP 2)
+    // ====================================================
+    fun createProduct(
+        product: ProductCreate
+    ) {
+
+        viewModelScope.launch {
+
+            _state.value = AddProductState.Loading
+
+            try {
+
+                productRepository.addProduct(product)
+
+                _state.value = AddProductState.Success
+
+            } catch (e: Exception) {
+
+                _state.value =
+                    AddProductState.Error(
+                        e.message ?: "Product creation failed"
+                    )
+            }
+        }
+    }
 }
