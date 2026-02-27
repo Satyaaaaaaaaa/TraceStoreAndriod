@@ -16,15 +16,15 @@ import com.sutonglabs.tracestore.models.Product
 
 @Composable
 fun ProductCardImage(
-    product: Product,
+    imageUrl: String?,
+    name: String,
     height: Dp = 100.dp
 ) {
-    val imageUrl = product.images.firstOrNull()?.imageUrl
 
-    if (imageUrl != null) {
+    if (!imageUrl.isNullOrEmpty()) {
         AsyncImage(
             model = Constants.BASE_URL + imageUrl,
-            contentDescription = product.name,
+            contentDescription = name,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(height),
