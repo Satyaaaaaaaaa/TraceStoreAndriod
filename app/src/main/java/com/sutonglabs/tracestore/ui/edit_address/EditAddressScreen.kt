@@ -129,8 +129,8 @@ fun EditAddressScreen(
                         )
                         // Call the update method on your AddressViewModel.
                         addressViewModel.updateAddress(
-                            context = context,
-                            updatedaddressRequest = updatedAddressRequest
+                            request = updatedAddressRequest,
+                            context = context
                         )
                         // Navigate back to the previous screen.
                         navController.previousBackStackEntry?.savedStateHandle?.set("addressUpdated", true)

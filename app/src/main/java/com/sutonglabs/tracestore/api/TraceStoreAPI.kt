@@ -11,6 +11,7 @@ import com.sutonglabs.tracestore.api.response_model.CategoryTreeResponse
 import com.sutonglabs.tracestore.api.response_model.CreateAddressResponse
 import com.sutonglabs.tracestore.api.response_model.CreateOrderResponse
 import com.sutonglabs.tracestore.api.response_model.OrdersResponse
+import com.sutonglabs.tracestore.api.response_model.PincodeResponse
 import com.sutonglabs.tracestore.api.response_model.UpdateAddressResponse
 import com.sutonglabs.tracestore.models.AddToCartRequest
 import com.sutonglabs.tracestore.models.AddressResponse
@@ -171,5 +172,11 @@ interface TraceStoreAPI {
     suspend fun verifyAsset(
         @Body body: Map<String, String>
     ): AssetVerificationResult
+
+
+    @GET("pincode/{pincode}")
+    suspend fun getLocationFromPincode(
+        @Path("pincode") pincode: String
+    ): PincodeResponse
 }
 
