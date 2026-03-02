@@ -2,131 +2,155 @@ package com.sutonglabs.tracestore.ui.add_address
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.sutonglabs.tracestore.api.request_models.CreateAddressRequest
-import com.sutonglabs.tracestore.api.request_models.UpdateAddressRequest
 import com.sutonglabs.tracestore.viewmodels.AddressViewModel
 
 @Composable
 fun AddAddressScreen(
     navController: NavController,
-    addressViewModel: AddressViewModel = hiltViewModel(),
-    context: Context
+    context: Context,
+    addressViewModel: AddressViewModel = hiltViewModel()
 ) {
-    // Retrieve the current address from your view model state.
+
     val addressState = addressViewModel.state.value
 
+    val city by addressViewModel.city
+    val stateName by addressViewModel.stateName
+    val loadingLocation by addressViewModel.isFetchingLocation
+
+    // ✅ FORM STATE
+    var name by rememberSaveable { mutableStateOf("") }
+    var phoneNumber by rememberSaveable { mutableStateOf("") }
+    var pincode by rememberSaveable { mutableStateOf("") }
+    var locality by rememberSaveable { mutableStateOf("") }
+    var buildingName by rememberSaveable { mutableStateOf("") }
+    var landmark by rememberSaveable { mutableStateOf("") }
+
     when {
+
         addressState.isLoading -> {
-            // Display a loading indicator while waiting for data.
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
         }
-//        addressState.address.isNullOrEmpty() -> {
-//            navController.popBackStack()
-//        }
-        else -> {
 
-            var name by remember { mutableStateOf("Satya") }
-            var phoneNumber by remember { mutableStateOf("9876543210") }
-            var pincode by remember { mutableStateOf("781022") }
-            var city by remember { mutableStateOf("Guwahati") }
-            var stateName by remember { mutableStateOf("Assam") }
-            var locality by remember { mutableStateOf("loda tola") }
-            var buildingName by remember { mutableStateOf("Residency") }
-            var landmark by remember { mutableStateOf("bhawan") }
+        else -> {
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
+
                 TextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+                Spacer(Modifier.height(8.dp))
+
                 TextField(
                     value = phoneNumber,
                     onValueChange = { phoneNumber = it },
                     label = { Text("Phone Number") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+                Spacer(Modifier.height(8.dp))
+
                 TextField(
                     value = pincode,
-                    onValueChange = { pincode = it },
+                    onValueChange = {
+                        pincode = it.take(6)
+
+                        if (pincode.length == 6)
+                            addressViewModel.onPincodeChanged(pincode)
+                    },
                     label = { Text("Pincode") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+                if (loadingLocation)
+                    CircularProgressIndicator()
+
+                Spacer(Modifier.height(8.dp))
+
                 TextField(
                     value = city,
-                    onValueChange = { city = it },
+                    onValueChange = {},
+                    enabled = false,
                     label = { Text("City") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+                Spacer(Modifier.height(8.dp))
+
                 TextField(
                     value = stateName,
-                    onValueChange = { stateName = it },
+                    onValueChange = {},
+                    enabled = false,
                     label = { Text("State") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+                Spacer(Modifier.height(8.dp))
+
                 TextField(
                     value = locality,
                     onValueChange = { locality = it },
                     label = { Text("Locality") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+                Spacer(Modifier.height(8.dp))
+
                 TextField(
                     value = buildingName,
                     onValueChange = { buildingName = it },
                     label = { Text("Building Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
+                Spacer(Modifier.height(8.dp))
+
                 TextField(
                     value = landmark,
                     onValueChange = { landmark = it },
                     label = { Text("Landmark") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+
+                Spacer(Modifier.height(16.dp))
+
                 Button(
                     onClick = {
-                        // Build an updated address request.
-                        val addAddressRequest = CreateAddressRequest(
-                            name = name,
-                            phoneNumber = phoneNumber,
-                            pincode = pincode,
-                            city = city,
-                            state = stateName,
-                            locality = locality,
-                            buildingName = buildingName,
-                            landmark = landmark
+
+                        val request = CreateAddressRequest(
+                            name,
+                            phoneNumber,
+                            pincode,
+                            city,
+                            stateName,
+                            locality,
+                            buildingName,
+                            landmark
                         )
-                        // Call the update method on your AddressViewModel.
-                        addressViewModel.createAddress(
-                            context = context,
-                            addAddressRequest = addAddressRequest
-                        )
-                        // Navigate back to the previous screen.
-                        navController.previousBackStackEntry?.savedStateHandle?.set("addressUpdated", true)
+
+                        addressViewModel.createAddress(request, context)
+
                         navController.popBackStack()
                     },
                     modifier = Modifier.fillMaxWidth()
