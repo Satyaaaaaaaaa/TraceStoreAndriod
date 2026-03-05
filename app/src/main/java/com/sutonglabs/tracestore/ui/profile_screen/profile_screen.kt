@@ -1,5 +1,6 @@
 package com.sutonglabs.tracestore.ui.profile_screen
 
+import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -42,10 +43,11 @@ fun ProfileScreen(
     onNavigateToAuth: () -> Unit,
 ) {
     val context = LocalContext.current
+    // Observe user info and JWT token from the ViewModel
     val userInfo by userViewModel.userInfo.collectAsState()
     val jwtToken by userViewModel.jwtToken.collectAsState()
 
-    // Fetch user information when the JWT token is available.
+    // Side effect to fetch user information whenever the JWT token changes or becomes available.
     LaunchedEffect(jwtToken) {
         jwtToken?.let { userViewModel.fetchUserInfo(it) }
     }
@@ -55,11 +57,13 @@ fun ProfileScreen(
             TopAppBar(
                 title = { Text("Account", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
+                    // Back button to return to the previous screen
                     IconButton(onClick = onBackBtnClick) {
                         Icon(Icons.Rounded.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
+                    // Settings icon (currently a placeholder)
                     IconButton(onClick = { /* Settings placeholder */ }) {
                         Icon(Icons.Rounded.Settings, contentDescription = "Settings")
                     }
@@ -71,19 +75,21 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()) // Enable scrolling for smaller screens
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            // User Header Section (Profile Picture, Name, Email, Verification status)
+            // Section 1: User Header
+            // Displays profile picture, full name, and blockchain verification status.
             ProfileHeader(
                 name = "${userInfo?.firstName ?: ""} ${userInfo?.lastName ?: ""}".trim().ifEmpty { userInfo?.username ?: "Guest" },
                 email = userInfo?.email ?: "Not Available",
-                isVerified = userInfo?.blockchainStatus ?: false
+                isVerified = userInfo?.blockchainStatus ?: 0
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Quick Action Links Section (Orders, Wishlist, Addresses)
+            // Section 2: Quick Action Links
+            // Provides horizontal cards for rapid navigation to Orders, Wishlist, etc.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -103,7 +109,8 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Main Menu Options Section
+            // Section 3: Main Menu List
+            // A styled column containing actionable menu items with dividers.
             Column(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -111,36 +118,41 @@ fun ProfileScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.surface)
             ) {
-                // Edit Profile item
+                // Allows user to modify their profile details
                 ProfileMenuItem(Icons.Rounded.Person, "Edit Profile") {
                     navController.navigate("update_profile_screen")
                 }
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.5f))
 
-                // Seller Hub / My Products item
+                // Navigation to the Seller Dashboard for managing listed products
                 ProfileMenuItem(Icons.Rounded.Storefront, "Seller Hub (My Products)", tint = MaterialTheme.colorScheme.secondary) {
                     navController.navigate("seller_dashboard_screen")
                 }
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.5f))
 
-                // Blockchain Sync item (shown only if not verified)
-                if (userInfo?.blockchainStatus == false) {
+                Log.d("API_DEBUG", "Raw response: $userInfo")
+
+                //todo -> not working, showing
+                // Conditional item: Show "Sync Blockchain" only if the user is not yet verified
+                if (userInfo?.blockchainStatus == 0) {
                     ProfileMenuItem(Icons.Rounded.VerifiedUser, "Sync Blockchain", tint = MaterialTheme.colorScheme.primary) {
                         userViewModel.syncAndRegister()
                     }
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.5f))
                 }
 
-                // Placeholder menu items
+                // Placeholder for managing notifications
                 ProfileMenuItem(Icons.Rounded.Notifications, "Notifications") { }
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.5f))
 
+                // Placeholder for support and help documents
                 ProfileMenuItem(Icons.Rounded.Help, "Help & Support") { }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Logout Button Section
+            // Section 4: Logout Action
+            // Red-tinted button to clear session and navigate back to authentication.
             TextButton(
                 onClick = {
                     userViewModel.logout(context)
@@ -165,9 +177,10 @@ fun ProfileScreen(
 
 /**
  * Composable for the profile header section.
+ * Renders the user's avatar, name, email, and a verification badge if applicable.
  */
 @Composable
-fun ProfileHeader(name: String, email: String, isVerified: Boolean) {
+fun ProfileHeader(name: String, email: String, isVerified: Int) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -175,6 +188,7 @@ fun ProfileHeader(name: String, email: String, isVerified: Boolean) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(contentAlignment = Alignment.BottomEnd) {
+            // Profile Picture Circle
             Surface(
                 modifier = Modifier.size(100.dp),
                 shape = CircleShape,
@@ -187,7 +201,8 @@ fun ProfileHeader(name: String, email: String, isVerified: Boolean) {
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
-            if (isVerified) {
+            // Verification checkmark badge
+            if (isVerified == 1) {
                 Surface(
                     modifier = Modifier.size(28.dp).shadow(2.dp, CircleShape),
                     shape = CircleShape,
@@ -200,10 +215,12 @@ fun ProfileHeader(name: String, email: String, isVerified: Boolean) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Display Name and Email
         Text(text = name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Text(text = email, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-        if (isVerified) {
+        // "Verified" label pill
+        if (isVerified == 1) {
             Surface(
                 modifier = Modifier.padding(top = 8.dp),
                 color = Color(0xFFE8F5E9),
@@ -223,6 +240,7 @@ fun ProfileHeader(name: String, email: String, isVerified: Boolean) {
 
 /**
  * Composable for an individual quick link card.
+ * Used for top-level summary actions like viewing orders or favorites.
  */
 @Composable
 fun QuickLinkItem(icon: ImageVector, label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
@@ -245,6 +263,7 @@ fun QuickLinkItem(icon: ImageVector, label: String, modifier: Modifier = Modifie
 
 /**
  * Composable for an individual menu item row.
+ * A horizontal row with an icon, text label, and a trailing chevron.
  */
 @Composable
 fun ProfileMenuItem(icon: ImageVector, label: String, tint: Color = MaterialTheme.colorScheme.onSurface, onClick: () -> Unit) {
