@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.sutonglabs.tracestore.ui.toast.showCustomToast
 import com.sutonglabs.tracestore.viewmodels.ForgotPasswordViewModel
 
 @Composable
@@ -50,11 +51,13 @@ fun ForgotPasswordScreen(
 
             navController.navigate("verify_otp/$email")
 
-            Toast.makeText(
-                context,
-                "OTP sent to $email",
-                Toast.LENGTH_SHORT
-            ).show()
+//            Toast.makeText(
+//                context,
+//                "OTP sent to $email",
+//                Toast.LENGTH_SHORT
+//            ).show()
+
+            showCustomToast(context, "OTP sent to $email")
 
         } else {
 
