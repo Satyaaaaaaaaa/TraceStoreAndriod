@@ -27,7 +27,7 @@ fun ForgotPasswordScreen(
     navController: NavController,
     viewModel: ForgotPasswordViewModel = hiltViewModel()
 ) {
-    var email by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("abc@gmail.com") }
     val context = LocalContext.current
     val otpState by viewModel.otpState.collectAsState()
 

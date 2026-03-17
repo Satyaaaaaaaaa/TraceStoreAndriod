@@ -80,7 +80,7 @@ fun VerifyOtpScreen(
                 value = otp,
                 onValueChange = { if (it.length <= 6) otp = it },
                 label = { Text("Verification Code") },
-                placeholder = { Text("000000") },
+                //placeholder = { Text("000000") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 singleLine = true,
@@ -114,6 +114,7 @@ fun VerifyOtpScreen(
 
             TextButton(onClick = { viewModel.requestOtp(email) }) {
                 Text("Didn't receive code? Resend", color = MaterialTheme.colorScheme.primary)
+                showCustomToast(context = context, message = "OTP resent successfully!")
             }
         }
     }
