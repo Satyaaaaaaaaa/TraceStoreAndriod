@@ -18,39 +18,56 @@ import javax.inject.Inject
 class AddressRepositoryImp @Inject constructor(
     private val traceStoreApiService: TraceStoreAPI,
 ): AddressRepository {
-    override suspend fun getAddress(context: Context): AddressResponse {
-        val token = getJwtToken(context).first()
-        return withContext(Dispatchers.IO) {
-            traceStoreApiService.getAddress("Bearer $token").await()
+    override suspend fun getAddress(context: Context): AddressResponse? {
+        return try {
+            val token = getJwtToken(context).first()
+            withContext(Dispatchers.IO) {
+                traceStoreApiService.getAddress("Bearer $token").await()
+            }
+        } catch (e: Exception) {
+            Log.e("AddressRepository", "getAddress Exception", e)
+            null
         }
     }
 
-    override suspend fun createAddress(context: Context, address: CreateAddressRequest): CreateAddressResponse {
-        val token = getJwtToken(context).first()
-        return withContext(Dispatchers.IO) {
-            val response = traceStoreApiService.createAddress("Bearer $token", address)
-            if (response.isSuccessful && response.body() != null) {
-                Log.d("AddressRepository", "Address created successfully")
-                response.body()!!
-            } else {
-                throw Exception("Failed to create Address. ${response.errorBody()?.string()}")
+    override suspend fun createAddress(context: Context, address: CreateAddressRequest): CreateAddressResponse? {
+        return try {
+            val token = getJwtToken(context).first()
+            withContext(Dispatchers.IO) {
+                val response = traceStoreApiService.createAddress("Bearer $token", address)
+                if (response.isSuccessful && response.body() != null) {
+                    Log.d("AddressRepository", "Address created successfully")
+                    response.body()!!
+                } else {
+                    Log.e("AddressRepository", "Failed to create Address: ${response.code()}")
+                    null
+                }
             }
+        } catch (e: Exception) {
+            Log.e("AddressRepository", "createAddress Exception", e)
+            null
         }
     }
 
     override suspend fun updateAddress(
         context: Context,
         updatedAddress: UpdateAddressRequest
-    ): UpdateAddressResponse {
-        val token = getJwtToken(context).first()
-        return withContext(Dispatchers.IO) {
-            val response = traceStoreApiService.updateAddress("Bearer $token", updatedAddress)
-            if (response.isSuccessful && response.body() != null) {
-                Log.d("AddressRepository", "Address updated successfully")
-                response.body()!!
-            } else {
-                throw Exception("Failed to updated Address. ${response.errorBody()?.string()}")
+    ): UpdateAddressResponse? {
+        return try {
+            val token = getJwtToken(context).first()
+            withContext(Dispatchers.IO) {
+                val response = traceStoreApiService.updateAddress("Bearer $token", updatedAddress)
+                if (response.isSuccessful && response.body() != null) {
+                    Log.d("AddressRepository", "Address updated successfully")
+                    response.body()!!
+                } else {
+                    Log.e("AddressRepository", "Failed to update Address: ${response.code()}")
+                    null
+                }
             }
+        } catch (e: Exception) {
+            Log.e("AddressRepository", "updateAddress Exception", e)
+            null
         }
     }
 }

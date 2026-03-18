@@ -15,31 +15,43 @@ class CartRepositoryImp @Inject constructor(
     @ApplicationContext private val context: Context
 ) : CartRepository {
 
-    override suspend fun getCart(): CartResponse {
-        val token = getJwtToken(context).first()
-        Log.d("VIEW_CART", " getCart repository called")
-        return traceStoreApiService.getCart("Bearer $token")
+    override suspend fun getCart(): CartResponse? {
+        return try {
+            val token = getJwtToken(context).first()
+            Log.d("VIEW_CART", " getCart repository called")
+            traceStoreApiService.getCart("Bearer $token")
+        } catch (e: Exception) {
+            Log.e("CartRepository", "getCart Exception", e)
+            null
+        }
     }
 
     override suspend fun updateCartItem(
         cartItemId: Int,
         quantity: Int
-    ): UpdateCartResponse {
-
-        val token = getJwtToken(context).first()
-
-        return traceStoreApiService.updateCartItem(
-            "Bearer $token",
-            UpdateCartRequest(cartItemId, quantity)
-        )
+    ): UpdateCartResponse? {
+        return try {
+            val token = getJwtToken(context).first()
+            traceStoreApiService.updateCartItem(
+                "Bearer $token",
+                UpdateCartRequest(cartItemId, quantity)
+            )
+        } catch (e: Exception) {
+            Log.e("CartRepository", "updateCartItem Exception", e)
+            null
+        }
     }
 
-    override suspend fun addToCart(productId: Int): CartResponse {
-        val token = getJwtToken(context).first()
-
-        return traceStoreApiService.addToCart(
-            AddToCartRequest(productId),
-            "Bearer $token"
-        )
+    override suspend fun addToCart(productId: Int): CartResponse? {
+        return try {
+            val token = getJwtToken(context).first()
+            traceStoreApiService.addToCart(
+                AddToCartRequest(productId),
+                "Bearer $token"
+            )
+        } catch (e: Exception) {
+            Log.e("CartRepository", "addToCart Exception", e)
+            null
+        }
     }
 }

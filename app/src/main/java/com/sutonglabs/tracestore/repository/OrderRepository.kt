@@ -8,10 +8,9 @@ import com.sutonglabs.tracestore.models.SellerOrderResponse
 
 
 interface OrderRepository {
-    suspend fun createOrder(context: Context, orderRequest: CreateOrderRequest): CreateOrderResponse
-    suspend fun getOrders(context: Context): List<Order>
-    suspend fun getSellerOrders(context: Context): List<SellerOrderResponse>  // changed here
+    suspend fun createOrder(context: Context, orderRequest: CreateOrderRequest): CreateOrderResponse?
+    suspend fun getOrders(context: Context): List<Order>?
+    suspend fun getSellerOrders(context: Context): List<SellerOrderResponse>?
 
     suspend fun updateOrderStatus(context: Context, orderId: Int, status: String)
 }
-

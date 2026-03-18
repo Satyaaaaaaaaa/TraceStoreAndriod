@@ -1,6 +1,8 @@
 package com.sutonglabs.tracestore.repository
 
+import android.util.Log
 import com.sutonglabs.tracestore.api.TraceStoreAPI
+import com.sutonglabs.tracestore.api.response_model.SearchResponse
 import javax.inject.Inject
 
 class SearchRepository @Inject constructor(
@@ -10,5 +12,12 @@ class SearchRepository @Inject constructor(
         query: String,
         page: Int,
         limit: Int
-    ) = traceStoreApiService.searchProducts(query, page, limit)
+    ): SearchResponse? {
+        return try {
+            traceStoreApiService.searchProducts(query, page, limit)
+        } catch (e: Exception) {
+            Log.e("SearchRepository", "search Exception", e)
+            null
+        }
+    }
 }
