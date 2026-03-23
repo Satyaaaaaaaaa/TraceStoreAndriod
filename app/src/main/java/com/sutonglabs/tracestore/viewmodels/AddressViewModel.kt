@@ -88,8 +88,10 @@ class AddressViewModel @Inject constructor(
                 val response =
                     pincodeRepository.fetchLocation(pincode)
 
-                city.value = response.data.city
-                stateName.value = response.data.state
+                response?.let {
+                    city.value = it.data.city
+                    stateName.value = it.data.state
+                }
 
             } catch (e: Exception) {
                 Log.e("PINCODE", e.message ?: "")
@@ -108,7 +110,7 @@ class AddressViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 addressRepository.createAddress(context, request)
-                Toast.makeText(context,"Address Created!",Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Address Created!", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Log.e("AddressVM", e.message ?: "")
             }
@@ -124,7 +126,7 @@ class AddressViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 addressRepository.updateAddress(context, request)
-                Toast.makeText(context,"Address Updated!",Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Address Updated!", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Log.e("AddressVM", e.message ?: "")
             }

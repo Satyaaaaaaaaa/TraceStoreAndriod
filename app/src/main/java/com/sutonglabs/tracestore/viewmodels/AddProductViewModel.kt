@@ -44,7 +44,11 @@ class AddProductViewModel(
                         imageUris
                     )
 
-                onSuccess(response.image_uuids)
+                if (response != null && response.status) {
+                    onSuccess(response.image_uuids)
+                } else {
+                    onError(response?.message ?: "Image upload failed")
+                }
 
             } catch (e: Exception) {
 

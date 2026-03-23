@@ -38,14 +38,15 @@ class SearchViewModel @Inject constructor(
 
         viewModelScope.launch {
             val response = repository.search(query, page, limit)
+            if (response != null) {
+                products = products + response.results
 
-            products = products + response.results
-
-            val loaded = page * limit
-            if (loaded >= response.total) {
-                canLoadMore = false
-            } else {
-                page++
+                val loaded = page * limit
+                if (loaded >= response.total) {
+                    canLoadMore = false
+                } else {
+                    page++
+                }
             }
         }
     }

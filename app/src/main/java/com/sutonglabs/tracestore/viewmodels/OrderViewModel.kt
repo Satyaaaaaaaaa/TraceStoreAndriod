@@ -54,8 +54,8 @@ class OrderViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val response = orderRepository.getOrders(context)
-                _order.value = response
-                Log.d("OrderViewModel", "Orders fetched successfully: ${response.size} order")
+                _order.value = response ?: emptyList()
+                Log.d("OrderViewModel", "Orders fetched successfully: ${response?.size ?: 0} order")
             } catch (e: Exception) {
                 _errorMessage.value = e.message
                 Log.e("OrderViewModel", "Error fetching order: ${e.message}")
@@ -71,8 +71,8 @@ class OrderViewModel @Inject constructor(
             _isLoading.value = true
             try {
                 val response = orderRepository.getSellerOrders(context)
-                _sellerOrders.value = response
-                Log.d("OrderViewModel", "Seller orders fetched: ${response.size}")
+                _sellerOrders.value = response ?: emptyList()
+                Log.d("OrderViewModel", "Seller orders fetched: ${response?.size ?: 0}")
             } catch (e: Exception) {
                 _errorMessage.value = e.message
                 Log.e("OrderViewModel", "Error fetching seller orders: ${e.message}")
@@ -98,4 +98,3 @@ class OrderViewModel @Inject constructor(
 
 
 }
-

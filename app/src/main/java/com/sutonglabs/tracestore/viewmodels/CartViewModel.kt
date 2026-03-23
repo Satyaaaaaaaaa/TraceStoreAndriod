@@ -31,9 +31,15 @@ class CartViewModel @Inject constructor(
 
                 val response = cartRepository.getCart()
 
-                _state.value = CartProductState(
-                    items = response.data.items
-                )
+                if (response != null) {
+                    _state.value = CartProductState(
+                        items = response.data.items
+                    )
+                } else {
+                    _state.value = CartProductState(
+                        errorMessage = "Empty response from server"
+                    )
+                }
 
             } catch (e: Exception) {
                 _state.value = CartProductState(
@@ -49,7 +55,7 @@ class CartViewModel @Inject constructor(
                 val response =
                     cartRepository.updateCartItem(cartItemId, newQuantity)
 
-                if (response.status) {
+                if (response != null && response.status) {
                     val updatedItem = response.data
 
                     _state.value = _state.value.copy(
