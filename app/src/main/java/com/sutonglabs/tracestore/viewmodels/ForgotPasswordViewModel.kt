@@ -40,7 +40,7 @@ class ForgotPasswordViewModel @Inject constructor(
 
             val response = repository.verifyOtp(email, otp)
 
-            if (response.isSuccessful) {
+            if (response?.isSuccessful == true) {
                 _verifyOtpState.value = response.body()
             }
 
@@ -54,7 +54,7 @@ class ForgotPasswordViewModel @Inject constructor(
 
             val response = repository.resetPassword(token, password)
 
-            if (response.isSuccessful) {
+            if (response?.isSuccessful == true) {
                 _resetState.value = response.body()
             }
 

@@ -20,109 +20,133 @@ class ProductRepositoryImp @Inject constructor(
     private val tokenProvider: TokenProvider
 ) : ProductRepository {
 
-    override suspend fun getProduct(): ProductResponse =
+    override suspend fun getProduct(): ProductResponse? =
         withContext(Dispatchers.IO) {
-            val response = traceStoreApiService.getProducts()
+            try {
+                val response = traceStoreApiService.getProducts()
 
-            if (!response.isSuccessful || response.body() == null) {
-                Log.e(
-                    "ProductRepository",
-                    "Fetch products failed: ${response.code()} ${response.message()}"
-                )
-                throw Exception("Failed to fetch products")
+                if (response.isSuccessful && response.body() != null) {
+                    response.body()!!
+                } else {
+                    Log.e(
+                        "ProductRepository",
+                        "Fetch products failed: ${response.code()} ${response.message()}"
+                    )
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("ProductRepository", "getProduct Exception", e)
+                null
             }
-
-            response.body()!!
         }
 
-    override suspend fun getProductDetail(id: Int): Product =
+    override suspend fun getProductDetail(id: Int): Product? =
         withContext(Dispatchers.IO) {
-            val token = tokenProvider.getToken()
-            val response =
-                traceStoreApiService.getProductDetail(id, "Bearer $token")
+            try {
+                val token = tokenProvider.getToken()
+                val response =
+                    traceStoreApiService.getProductDetail(id, "Bearer $token")
 
-            if (!response.isSuccessful || response.body()?.data == null) {
-                Log.e(
-                    "ProductRepository",
-                    "Fetch product detail failed: ${response.code()}"
-                )
-                throw Exception("Failed to fetch product detail")
+                if (response.isSuccessful && response.body()?.data != null) {
+                    response.body()!!.data!!
+                } else {
+                    Log.e(
+                        "ProductRepository",
+                        "Fetch product detail failed: ${response.code()}"
+                    )
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("ProductRepository", "getProductDetail Exception", e)
+                null
             }
-
-            response.body()!!.data!!
         }
 
-    override suspend fun addProduct(product: ProductCreate): ProductDetailResponse =
+    override suspend fun addProduct(product: ProductCreate): ProductDetailResponse? =
         withContext(Dispatchers.IO) {
+            try {
+                val token = tokenProvider.getToken()
+                val response =
+                    traceStoreApiService.addProduct("Bearer $token", product)
 
-            val token = tokenProvider.getToken()
-            val response =
-                traceStoreApiService.addProduct("Bearer $token", product)
+                val body = response.body()
 
-            val body = response.body()
-
-            if (!response.isSuccessful || body == null) {
-                Log.e(
-                    "ProductRepository",
-                    "Add product failed: ${response.code()} ${response.message()}"
-                )
-                throw Exception("Product creation failed")
+                if (response.isSuccessful && body != null) {
+                    Log.d("ProductRepository", "Product creation successful")
+                    body
+                } else {
+                    Log.e(
+                        "ProductRepository",
+                        "Add product failed: ${response.code()} ${response.message()}"
+                    )
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("ProductRepository", "addProduct Exception", e)
+                null
             }
-
-            Log.d("ProductRepository", "Product creation successful")
-            body
         }
 
 
     override suspend fun uploadImages(
         context: Context,
         imageUris: List<Uri>
-    ): ImageUploadResponse {
-
-        val token = tokenProvider.getToken()
-
-        val parts = imageUris.map { uri ->
-            val file = ImageFileHelper.uriToFile(context, uri)
-            val body = file
-                .asRequestBody("image/*".toMediaTypeOrNull())
-
-            MultipartBody.Part.createFormData(
-                name = "image",
-                filename = file.name,
-                body = body
-            )
-        }
-
-        val response =
-            traceStoreApiService.uploadProductImages(
-                "Bearer $token",
-                parts
-            )
-
-        if (!response.isSuccessful || response.body() == null) {
-            throw Exception("Image upload failed")
-        }
-
-        return response.body()!!
-    }
-
-    override suspend fun syncProductToBlockchain(productId: Int): Product =
-        withContext(Dispatchers.IO) {
+    ): ImageUploadResponse? {
+        return try {
             val token = tokenProvider.getToken()
-            val response =
-                traceStoreApiService.syncProductToBlockchain(
-                    "Bearer $token",
-                    productId
-                )
 
-            if (!response.isSuccessful || response.body()?.data == null) {
-                Log.e(
-                    "ProductRepository",
-                    "Blockchain sync failed: ${response.code()}"
+            val parts = imageUris.map { uri ->
+                val file = ImageFileHelper.uriToFile(context, uri)
+                val body = file
+                    .asRequestBody("image/*".toMediaTypeOrNull())
+
+                MultipartBody.Part.createFormData(
+                    name = "image",
+                    filename = file.name,
+                    body = body
                 )
-                throw Exception("Blockchain sync failed")
             }
 
-            response.body()!!.data!!
+            val response =
+                traceStoreApiService.uploadProductImages(
+                    "Bearer $token",
+                    parts
+                )
+
+            if (response.isSuccessful && response.body() != null) {
+                response.body()!!
+            } else {
+                Log.e("ProductRepository", "Image upload failed: ${response.code()}")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("ProductRepository", "uploadImages Exception", e)
+            null
+        }
+    }
+
+    override suspend fun syncProductToBlockchain(productId: Int): Product? =
+        withContext(Dispatchers.IO) {
+            try {
+                val token = tokenProvider.getToken()
+                val response =
+                    traceStoreApiService.syncProductToBlockchain(
+                        "Bearer $token",
+                        productId
+                    )
+
+                if (response.isSuccessful && response.body()?.data != null) {
+                    response.body()!!.data!!
+                } else {
+                    Log.e(
+                        "ProductRepository",
+                        "Blockchain sync failed: ${response.code()}"
+                    )
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e("ProductRepository", "syncProductToBlockchain Exception", e)
+                null
+            }
         }
 }

@@ -21,39 +21,57 @@ class OrderRepositoryImp @Inject constructor(
     private val traceStoreApiService: TraceStoreAPI
 ) : OrderRepository {
 
-    override suspend fun createOrder(context: Context, orderRequest: CreateOrderRequest): CreateOrderResponse {
-        val token = getJwtToken(context).first()
-        return withContext(Dispatchers.IO) {
-            val response = traceStoreApiService.createOrder("Bearer $token", orderRequest)
-            if (response.isSuccessful && response.body() != null) {
-                response.body()!!
-            } else {
-                throw Exception("Failed to create order. ${response.errorBody()?.string()}")
+    override suspend fun createOrder(context: Context, orderRequest: CreateOrderRequest): CreateOrderResponse? {
+        return try {
+            val token = getJwtToken(context).first()
+            withContext(Dispatchers.IO) {
+                val response = traceStoreApiService.createOrder("Bearer $token", orderRequest)
+                if (response.isSuccessful && response.body() != null) {
+                    response.body()!!
+                } else {
+                    Log.e("OrderRepository", "Failed to create order: ${response.code()}")
+                    null
+                }
             }
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "createOrder Exception", e)
+            null
         }
     }
 
-    override suspend fun getOrders(context: Context): List<Order> {
-        val token = getJwtToken(context).first()
-        return withContext(Dispatchers.IO) {
-            val response = traceStoreApiService.getOrders("Bearer $token")
-            if (response.isSuccessful && response.body() != null) {
-                response.body()!!.data // Correctly returning the list of orders
-            } else {
-                throw Exception("Failed to fetch orders. ${response.errorBody()?.string()}")
+    override suspend fun getOrders(context: Context): List<Order>? {
+        return try {
+            val token = getJwtToken(context).first()
+            withContext(Dispatchers.IO) {
+                val response = traceStoreApiService.getOrders("Bearer $token")
+                if (response.isSuccessful && response.body() != null) {
+                    response.body()!!.data
+                } else {
+                    Log.e("OrderRepository", "Failed to fetch orders: ${response.code()}")
+                    null
+                }
             }
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "getOrders Exception", e)
+            null
         }
     }
 
-    override suspend fun getSellerOrders(context: Context): List<SellerOrderResponse> {
-        val token = getJwtToken(context).first()
-        return withContext(Dispatchers.IO) {
-            val response = traceStoreApiService.getSellerOrders("Bearer $token")
-            if (response.isSuccessful && response.body() != null) {
-                response.body()!!.data  // or response.body()!! if it's a List directly
-            } else {
-                throw Exception("Failed to fetch seller orders. ${response.errorBody()?.string()}")
+    override suspend fun getSellerOrders(context: Context): List<SellerOrderResponse>? {
+        return try {
+            val token = getJwtToken(context).first()
+            withContext(Dispatchers.IO) {
+                val response = traceStoreApiService.getSellerOrders("Bearer $token")
+                if (response.isSuccessful && response.body() != null) {
+                    response.body()!!.data
+                } else {
+                    Log.e("OrderRepository", "Failed to fetch seller orders: ${response.code()}")
+                    null
+                }
             }
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "getSellerOrders Exception", e)
+            null
         }
     }
 
@@ -62,23 +80,23 @@ class OrderRepositoryImp @Inject constructor(
         orderId: Int,
         status: String
     ) {
-        val rawToken = getJwtToken(context).first()
-            ?: throw IllegalStateException("JWT token is null")
+        try {
+            val rawToken = getJwtToken(context).first()
+                ?: throw IllegalStateException("JWT token is null")
 
-        //Log.d("TOKEN_DEBUG", "rawToken = $rawToken")
+            val token = "Bearer $rawToken"
 
-        val token = "Bearer $rawToken"
+            val response = traceStoreApiService.updateOrderStatus(
+                token = token,
+                orderId = orderId,
+                body = mapOf("status" to status)
+            )
 
-        val response = traceStoreApiService.updateOrderStatus(
-            token = token,
-            orderId = orderId,
-            body = mapOf("status" to status)
-        )
-
-        //Toast.makeText(context, "Address Created!", Toast.LENGTH_SHORT).show()
-
-        if (!response.isSuccessful) {
-            throw Exception("Failed to update order status: ${response.errorBody()?.string()}")
+            if (!response.isSuccessful) {
+                Log.e("OrderRepository", "Failed to update order status: ${response.code()}")
+            }
+        } catch (e: Exception) {
+            Log.e("OrderRepository", "updateOrderStatus Exception", e)
         }
     }
     

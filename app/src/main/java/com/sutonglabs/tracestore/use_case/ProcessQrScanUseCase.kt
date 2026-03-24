@@ -9,7 +9,6 @@ class ProcessQrScanUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(assetId: String): AssetVerificationResult {
         require(assetId.isNotBlank()) { "Invalid QR code" }
-        return repository.verifyAsset(assetId)
+        return repository.verifyAsset(assetId) ?: throw Exception("Asset verification failed")
     }
 }
-

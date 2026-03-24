@@ -23,53 +23,67 @@ class UserRepository @Inject constructor(
     val jwtToken: Flow<String?> = getJwtToken(context)
 
     suspend fun getUserInfo(token: String): Result<User> {
-        val response = apiService.getUserInfo("Bearer $token")
+        return try {
+            val response = apiService.getUserInfo("Bearer $token")
 
-        if (response.isSuccessful && response.body() != null) {
-            val responseData = response.body()!!
-            val apiUser = responseData.data
+            if (response.isSuccessful && response.body() != null) {
+                val responseData = response.body()!!
+                val apiUser = responseData.data
 
-            Log.d("UserRepository", "Extracted API User: $apiUser")
+                Log.d("UserRepository", "Extracted API User: $apiUser")
 
-            val mappedUser = User(
-                id = apiUser.id.toInt(),
-                username = apiUser.username ?: "Unknown",
-                email = apiUser.email ?: "No Email",
-                firstName = apiUser.firstName ?: "",
-                lastName = apiUser.lastName ?: "",
-                age = apiUser.age.toInt(),
-                role = apiUser.role ?: "User",
-                gstin = apiUser.gstin,
-                createdAt = apiUser.createdAt,
-                updatedAt = apiUser.updatedAt,
-                blockchainStatus = apiUser.blockchainStatus,
-            )
+                val mappedUser = User(
+                    id = apiUser.id.toInt(),
+                    username = apiUser.username ?: "Unknown",
+                    email = apiUser.email ?: "No Email",
+                    firstName = apiUser.firstName ?: "",
+                    lastName = apiUser.lastName ?: "",
+                    age = apiUser.age.toInt(),
+                    role = apiUser.role ?: "User",
+                    gstin = apiUser.gstin,
+                    createdAt = apiUser.createdAt,
+                    updatedAt = apiUser.updatedAt,
+                    blockchainStatus = apiUser.blockchainStatus,
+                )
 
-            return Result.success(mappedUser)
-        } else {
-            return Result.failure(Exception("Failed to fetch user info"))
+                Result.success(mappedUser)
+            } else {
+                Result.failure(Exception("Failed to fetch user info: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
     suspend fun getUser(): Result<Int> {
-        val token = getJwtToken(context).first()
-        val response = apiService.getUser("Bearer $token")
-        return if (response.isSuccessful && response.body() != null) {
-            Result.success(response.body()!!.data.id)
-        } else {
-            Result.failure(Exception("Failed to fetch user"))
+        return try {
+            val token = getJwtToken(context).first()
+            val response = apiService.getUser("Bearer $token")
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!.data.id)
+            } else {
+                Result.failure(Exception("Failed to fetch user: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
     suspend fun login(username: String, password: String): Result<String> {
-        val response = apiService.login(LoginRequest(username, password))
-        return if (response.isSuccessful && response.body() != null) {
-            val jwt = response.body()!!.data.token
-            saveJwtToken(context, jwt)
-            Log.d("UserRepository", "Saved JWT Token: $jwt")
-            Result.success(jwt)
-        } else {
-            Result.failure(Exception("Login failed"))
+        return try {
+            val response = apiService.login(LoginRequest(username, password))
+            if (response.isSuccessful && response.body() != null) {
+                val jwt = response.body()!!.data.token
+                saveJwtToken(context, jwt)
+                Log.d("UserRepository", "Saved JWT Token: $jwt")
+                Result.success(jwt)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Login failed"
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e("UserRepository", "Login Exception", e)
+            Result.failure(Exception("Network error: Server not responding"))
         }
     }
 
@@ -81,42 +95,50 @@ class UserRepository @Inject constructor(
                          GSTIN: String,
                          password: String
     ): Result<String> {
-        val response = apiService.register(RegisterRequest(username, email, firstName, lastName, age, GSTIN, password))
-        return if (response.isSuccessful && response.body() != null) {
-            val jwt = response.body()!!.data.token
-            saveJwtToken(context, jwt)
-            Log.d("UserRepository", "Saved JWT Token: $jwt")
-            Result.success(jwt)
-        } else {
-            Result.failure(Exception("Registration Failed!"))
+        return try {
+            val response = apiService.register(RegisterRequest(username, email, firstName, lastName, age, GSTIN, password))
+            if (response.isSuccessful && response.body() != null) {
+                val jwt = response.body()!!.data.token
+                saveJwtToken(context, jwt)
+                Log.d("UserRepository", "Saved JWT Token: $jwt")
+                Result.success(jwt)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Registration Failed!"
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Log.e("UserRepository", "Register Exception", e)
+            Result.failure(Exception("Network error: Server not responding"))
         }
     }
+
     suspend fun clearJwtToken(context: Context) {
-        // This function should clear the saved JWT token (likely in SharedPreferences)
         context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE).edit().clear().apply()
         Log.d("UserRepository", "JWT Token cleared.")
     }
 
     suspend fun updateUser(token: String, firstName: String, lastName: String, age: Int): Result<User> {
-        val request = UpdateUserRequest(firstName, lastName, age)
-        val response = apiService.updateUser(request, "Bearer $token")
+        return try {
+            val request = UpdateUserRequest(firstName, lastName, age)
+            val response = apiService.updateUser(request, "Bearer $token")
 
-        return if (response.isSuccessful && response.body() != null) {
-            Log.d("UserRepository", "User profile updated: ${response.body()!!.data}")
-            Result.success(response.body()!!.data)
-        } else {
-            Log.d("UserRepository", "Failed to update user profile")
-            Result.failure(Exception("Update failed"))
+            if (response.isSuccessful && response.body() != null) {
+                Log.d("UserRepository", "User profile updated: ${response.body()!!.data}")
+                Result.success(response.body()!!.data)
+            } else {
+                Log.d("UserRepository", "Failed to update user profile")
+                Result.failure(Exception("Update failed: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
     suspend fun syncUserToBlockchain(token: String): Result<User> {
         return try {
-            // Change '.' to 'apiService' and ensure it calls the right method
             val response = apiService.syncUserToBlockchain("Bearer $token")
 
             if (response.isSuccessful && response.body() != null) {
-                // Note: If your API returns a wrapper, you must extract the 'data'
                 val updatedUser = response.body()!!.data
                 Result.success(updatedUser)
             } else {
