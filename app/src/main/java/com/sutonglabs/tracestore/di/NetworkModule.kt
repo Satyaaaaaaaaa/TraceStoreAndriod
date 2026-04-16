@@ -3,6 +3,7 @@ package com.sutonglabs.tracestore.di
 import com.sutonglabs.tracestore.api.TraceStoreAPI
 import com.sutonglabs.tracestore.common.Constants
 import com.sutonglabs.tracestore.services.AuthService
+import com.sutonglabs.tracestore.services.ReviewService
 import com.sutonglabs.tracestore.services.SearchService
 import dagger.Module
 import dagger.Provides
@@ -40,5 +41,11 @@ class NetworkModule {
     @Provides
     fun provideSearchService(retrofit: Retrofit): SearchService {
         return retrofit.create(SearchService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideReviewService(retrofit: Retrofit): ReviewService {
+        return retrofit.create(ReviewService::class.java)
     }
 }

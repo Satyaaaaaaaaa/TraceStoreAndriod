@@ -18,12 +18,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 import com.sutonglabs.tracestore.repository.ProductRepository
+import com.sutonglabs.tracestore.api.request_models.ReviewRequest
+import com.sutonglabs.tracestore.repository.ReviewRepository
 
 @HiltViewModel
 class ProductDetailViewModel @Inject constructor(
     private val getProductDetailUseCase: GetProductDetailUseCase,
     private val cartRepository: CartRepository, // Injected CartRepository
-    private val productRepository: ProductRepository //Injected productRepository
+    private val productRepository: ProductRepository, //Injected productRepository
+    private val reviewRepository: ReviewRepository // Injected reviewRepository
 ) : ViewModel() {
 
     private val _state = mutableStateOf(ProductDetailState())
@@ -39,12 +42,43 @@ class ProductDetailViewModel @Inject constructor(
                         _state.value = ProductDetailState(isLoading = true)
                     }
                     is Resource.Success -> {
-                        _state.value = ProductDetailState(productDetail = result.data)
+                        _state.value = _state.value.copy(
+                            productDetail = result.data,
+                            isLoading = false
+                        )
+                        checkCanReview(id, context)
+                        getReviews(id)
                     }
                     is Resource.Error -> {
                         _state.value = ProductDetailState(errorMessage = result.message ?: "An unexpected error occurred")
                     }
                 }
+            }
+        }
+    }
+
+    private fun checkCanReview(productId: Int, context: Context) {
+        viewModelScope.launch {
+            try {
+                val token = getJwtToken(context).firstOrNull()
+                if (token != null) {
+                    val response = reviewRepository.canReview(token, productId)
+                    _state.value = _state.value.copy(canReview = response.canReview)
+                }
+            } catch (e: Exception) {
+                Log.e("ProductDetailViewModel", "Error checking canReview: ${e.message}")
+            }
+        }
+    }
+
+    private fun getReviews(productId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = reviewRepository.getReviews(productId)
+                // Postman shows count and rows. rows contains the list of reviews.
+                _state.value = _state.value.copy(reviews = response.rows)
+            } catch (e: Exception) {
+                Log.e("ProductDetailViewModel", "Error fetching reviews: ${e.message}")
             }
         }
     }
@@ -102,8 +136,46 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
+    fun submitReview(context: Context, review: ReviewRequest) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            try {
+                val token = getJwtToken(context).firstOrNull()
+                if (token == null) {
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        errorMessage = "Please login to submit a review"
+                    )
+                    return@launch
+                }
 
+                val response = reviewRepository.submitReview(token, review)
+                Log.d("ProductDetailViewModel", "Response: $response")
 
-
-
+                if (response.status || response.message?.contains("success", ignoreCase = true) == true) {
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        errorMessage = "" 
+                    )
+                    Toast.makeText(context, "Review submitted successfully!", Toast.LENGTH_SHORT).show()
+                    
+                    // Refresh product details, reviews and re-check canReview
+                    getProductDetail(review.productId, context)
+                } else {
+                    val errorMsg = response.message ?: response.error ?: "Failed to submit review"
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        errorMessage = errorMsg
+                    )
+                    Log.e("ProductDetailViewModel", "Error submitting review: $errorMsg")
+                }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    errorMessage = e.message ?: "An unexpected error occurred"
+                )
+                Log.e("ProductDetailViewModel", "Exception while submitting review: ${e.message}")
+            }
+        }
+    }
 }
