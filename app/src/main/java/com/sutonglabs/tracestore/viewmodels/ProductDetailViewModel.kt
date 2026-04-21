@@ -39,18 +39,23 @@ class ProductDetailViewModel @Inject constructor(
             getProductDetailUseCase(id, context).collect { result ->
                 when (result) {
                     is Resource.Loading -> {
-                        _state.value = ProductDetailState(isLoading = true)
+                        // Use .copy() to preserve existing data during refresh
+                        _state.value = _state.value.copy(isLoading = true)
                     }
                     is Resource.Success -> {
                         _state.value = _state.value.copy(
                             productDetail = result.data,
-                            isLoading = false
+                            isLoading = false,
+                            errorMessage = "" // Clear any previous error
                         )
                         checkCanReview(id, context)
                         getReviews(id)
                     }
                     is Resource.Error -> {
-                        _state.value = ProductDetailState(errorMessage = result.message ?: "An unexpected error occurred")
+                        _state.value = _state.value.copy(
+                            errorMessage = result.message ?: "An unexpected error occurred",
+                            isLoading = false
+                        )
                     }
                 }
             }
@@ -90,6 +95,7 @@ class ProductDetailViewModel @Inject constructor(
                 val token = getJwtToken(context).firstOrNull()
                 if (token == null) {
                     Log.e("ProductDetailViewModel", "JWT token is null")
+                    Toast.makeText(context, "Please login to add items to cart", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
@@ -100,6 +106,7 @@ class ProductDetailViewModel @Inject constructor(
                 Toast.makeText(context, "Item added to cart!", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Log.e("ProductDetailViewModel", "Error adding product to cart: ${e.message}")
+                Toast.makeText(context, "Failed to add item to cart", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -107,7 +114,7 @@ class ProductDetailViewModel @Inject constructor(
     fun syncProductToBlockchain(productId: Int, context: Context) {
         viewModelScope.launch {
             try {
-
+                _state.value = _state.value.copy(isLoading = true)
                 val result = productRepository.syncProductToBlockchain(productId)
 
                 if (result != null) {
@@ -118,7 +125,8 @@ class ProductDetailViewModel @Inject constructor(
 
                     _state.value = _state.value.copy(
                         productDetail = refreshedProduct,
-                        isLoading = false
+                        isLoading = false,
+                        errorMessage = ""
                     )
 
                     Toast.makeText(
@@ -130,8 +138,10 @@ class ProductDetailViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
-                    errorMessage = e.message ?: "Sync failed"
+                    errorMessage = e.message ?: "Sync failed",
+                    isLoading = false
                 )
+                Toast.makeText(context, e.message ?: "Sync failed", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -146,13 +156,22 @@ class ProductDetailViewModel @Inject constructor(
                         isLoading = false,
                         errorMessage = "Please login to submit a review"
                     )
+                    Toast.makeText(context, "Please login to submit a review", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
                 val response = reviewRepository.submitReview(token, review)
                 Log.d("ProductDetailViewModel", "Response: $response")
 
-                if (response.status || response.message?.contains("success", ignoreCase = true) == true) {
+                // Robust success check: handle different backend response styles
+                // We check status, message keywords, and cases where status is false but no error message exists
+                val isSuccess = response.status || 
+                                response.message?.contains("success", ignoreCase = true) == true ||
+                                response.message?.contains("submitted", ignoreCase = true) == true ||
+                                response.message?.contains("added", ignoreCase = true) == true ||
+                                (response.status == false && response.error == null && response.message != null)
+
+                if (isSuccess) {
                     _state.value = _state.value.copy(
                         isLoading = false,
                         errorMessage = "" 
@@ -160,6 +179,7 @@ class ProductDetailViewModel @Inject constructor(
                     Toast.makeText(context, "Review submitted successfully!", Toast.LENGTH_SHORT).show()
                     
                     // Refresh product details, reviews and re-check canReview
+                    // This now preserves the current state while fetching updates
                     getProductDetail(review.productId, context)
                 } else {
                     val errorMsg = response.message ?: response.error ?: "Failed to submit review"
@@ -167,13 +187,16 @@ class ProductDetailViewModel @Inject constructor(
                         isLoading = false,
                         errorMessage = errorMsg
                     )
+                    Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
                     Log.e("ProductDetailViewModel", "Error submitting review: $errorMsg")
                 }
             } catch (e: Exception) {
+                val errorMsg = e.message ?: "An unexpected error occurred"
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    errorMessage = e.message ?: "An unexpected error occurred"
+                    errorMessage = errorMsg
                 )
+                Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
                 Log.e("ProductDetailViewModel", "Exception while submitting review: ${e.message}")
             }
         }
